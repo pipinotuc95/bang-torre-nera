@@ -70,8 +70,18 @@
       msg('#msgAccesso', `✔ Collegato a <b>${esc(c.owner)}/${esc(c.repo)}</b>. Dati caricati.`, 'ok');
       avvia();
     } catch (e) {
-      const bloccato = e instanceof TypeError && /fetch|network|load/i.test(e.message);
-      msg('#msgAccesso', bloccato ? 'Il browser non riesce a raggiungere <b>api.github.com</b>: di solito lo blocca un blocco pubblicità o la protezione del browser (es. Brave Shields). Disattivalo per questa pagina e riprova.' : esc(e.message), 'err');
+      if (!(e instanceof TypeError)) return msg('#msgAccesso', esc(e.message), 'err');
+      // diagnosi: GitHub è raggiungibile senza token?
+      let raggiungibile = false;
+      try { raggiungibile = (await fetch('https://api.github.com/zen', { cache: 'no-store' })).ok; } catch (e2) { /* no */ }
+      const tok = $('#ghToken').value.replace(/\s+/g, '');
+      const strani = /[^\x21-\x7e]/.test(tok);
+      msg('#msgAccesso', (raggiungibile
+        ? (strani || !/^(github_pat_|ghp_)/.test(tok)
+            ? 'GitHub è raggiungibile, ma il <b>token</b> non sembra corretto (deve iniziare con <code>github_pat_</code> e non contenere caratteri strani). Ricopialo da GitHub con il pulsante 📋 e incollalo di nuovo.'
+            : 'GitHub è raggiungibile ma la richiesta con il token viene bloccata. Prova con un altro browser (Chrome/Edge) o disattiva le estensioni per questa pagina.')
+        : 'Il browser non riesce a raggiungere <b>api.github.com</b> nemmeno senza token: lo blocca una protezione (Brave Shields, blocco pubblicità, antivirus, DNS/rete). Prova da un altro browser o da un\'altra rete.')
+        + `<br><span class="mini dim">Dettaglio tecnico: ${esc(e.message)}</span>`, 'err');
     }
   };
   $('#btnOffline').onclick = async () => {
