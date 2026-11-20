@@ -41,6 +41,12 @@
   details summary{cursor:pointer;font-family:var(--f-titolo);font-size:16px;margin:6px 0}
   #msg{position:fixed;right:18px;bottom:18px;z-index:60;max-width:420px}
   #msg .avviso{box-shadow:0 8px 24px rgba(0,0,0,.5);margin:0}
+  .griglia-carte{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+  .gc{display:flex;gap:10px;align-items:center;padding:10px;border:1px dashed var(--paper-edge);border-radius:6px;background:rgba(255,255,255,.3)}
+  .gc .ant{flex:0 0 52px;height:80px;border-radius:5px;background:var(--wood-600);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--f-titolo);overflow:hidden}
+  .gc .ant img{width:100%;height:100%;object-fit:cover}
+  .gc .nm{font-family:var(--f-titolo);font-size:14px;line-height:1.15;margin-bottom:6px}
+  .gc .az{display:flex;gap:6px;flex-wrap:wrap}
   .x{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px}
 </style>
 </head>
@@ -115,6 +121,14 @@
       <div id="elencoPartite"></div>
       <h3 style="margin-top:26px">Verifica punteggi</h3>
       <div id="verifica"></div>
+    </section>
+
+    <!-- CARTE -->
+    <section class="carta" data-tab="carte">
+      <h2><span class="kicker">Facoltativo</span>Carte dei giocatori</h2>
+      <p class="nota" style="margin-top:-6px">Carica l'immagine della carta di un giocatore (JPG o PNG, anche una foto): viene ridimensionata e salvata subito. Chi non ha la carta continua a vedere le iniziali.</p>
+      <input class="cerca" id="cercaCarte" placeholder="Cerca un giocatore…" style="margin-bottom:14px">
+      <div id="elencoCarte" class="griglia-carte"></div>
     </section>
 
     <!-- IMPOSTAZIONI -->

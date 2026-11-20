@@ -16,7 +16,11 @@
     <path d="M50 8 L61 36 L92 36 L67 55 L77 86 L50 67 L23 86 L33 55 L8 36 L39 36 Z" fill="${col}" stroke="#4a3210" stroke-width="2.5"/>
     <circle cx="50" cy="52" r="9" fill="#f4e6c6" stroke="#4a3210" stroke-width="2"/></svg>`;
 
-  let DATI = null, S = null;
+  let DATI = null, S = null, MINI = {};
+  // avatar: miniatura della carta se c'è, altrimenti le iniziali
+  const avatar = (p, cls = 'avatar', stile = '') => MINI[p.slug]
+    ? `<span class="${cls} con-carta" style="${stile}"><img src="${MINI[p.slug]}" alt="Carta di ${esc(p.nome)}" loading="lazy"></span>`
+    : `<span class="${cls}" style="${stile}">${iniziali(p.nome)}</span>`;
   const filtro = { stagione: '', sede: '' };
 
   // ---------------- tooltip ----------------
@@ -255,7 +259,7 @@
     const q = $('#cercaG'), box = $('#listaG');
     const d = () => { const f = B.norm(q.value);
       const arr = S.giocatori.filter(p => !f || p.key.includes(f)).sort((a, b) => a.nome.localeCompare(b.nome));
-      box.innerHTML = arr.map(p => `<a class="carta scheda-g" href="#/giocatore/${p.slug}"><span class="avatar">${iniziali(p.nome)}</span><span><span class="n">${esc(p.nome)}</span><br><span class="d">${p.rank}° · ${p.presenze} ${p.presenze === 1 ? 'torneo' : 'tornei'} · ${B.fmt$(p.totale)}</span></span></a>`).join('') || vuoto('Nessuno trovato.'); };
+      box.innerHTML = arr.map(p => `<a class="carta scheda-g" href="#/giocatore/${p.slug}">${avatar(p)}<span><span class="n">${esc(p.nome)}</span><br><span class="d">${p.rank}° · ${p.presenze} ${p.presenze === 1 ? 'torneo' : 'tornei'} · ${B.fmt$(p.totale)}</span></span></a>`).join('') || vuoto('Nessuno trovato.'); };
     q.oninput = d; d();
   };
 
@@ -269,7 +273,7 @@
     const ruoliRighe = Object.keys(B.RUOLI).filter(r => p.ruoli[r]).map(r => ({ l: `<span class="ruolo ${r}">${B.RUOLI[r].nome}</span>`, v: p.ruoli[r].v / p.ruoli[r].g * 100, t: `${p.ruoli[r].v}/${p.ruoli[r].g} · ${pct(p.ruoli[r].v, p.ruoli[r].g)}`, c: COL[r] || COL[B.RUOLI[r].fazione] }));
     const pers = Object.entries(p.personaggi).sort((a, b) => b[1].g - a[1].g);
     return `
-      <section class="carta chiodi"><div class="profilo-testa"><span class="avatar">${iniziali(p.nome)}</span><div>
+      <section class="carta chiodi"><div class="profilo-testa">${MINI[p.slug] ? `<button class="carta-gioc" id="cartaGioc" title="Ingrandisci la carta"><img src="${MINI[p.slug]}" alt="Carta di ${esc(p.nome)}"></button>` : `<span class="avatar">${iniziali(p.nome)}</span>`}<div>
         <div class="mini" style="font-family:var(--f-mono);letter-spacing:2px;color:var(--red)">WANTED · ${p.rank}° NELLA CLASSIFICA GENERALE</div>
         <h1>${esc(p.nome)}</h1>
         <div class="chips">${p.vittorie ? `<span class="chip">🏆 ${p.vittorie} ${p.vittorie === 1 ? 'torneo vinto' : 'tornei vinti'}</span>` : ''}${p.podi ? `<span class="chip">⭐ ${p.podi} ${p.podi === 1 ? 'podio' : 'podi'}</span>` : ''}${p.personaggioPreferito ? `<span class="chip">🤠 ${esc(p.personaggioPreferito)}</span>` : ''}</div>
@@ -300,6 +304,17 @@
       </tbody></table></div></section>` : ''}`;
   };
 
+  PAGINE.giocatore.dopo = slug => {
+    const btn = $('#cartaGioc'); if (!btn) return;
+    let grande = null;
+    window.BANG_DB && window.BANG_DB.caricaCarta && window.BANG_DB.caricaCarta(slug).then(img => { if (img) { grande = img; btn.querySelector('img').src = img; } }).catch(() => {});
+    btn.onclick = () => {
+      const ov = document.createElement('div'); ov.className = 'lightbox';
+      ov.innerHTML = `<img src="${grande || btn.querySelector('img').src}" alt=""><span>✕</span>`;
+      ov.onclick = () => ov.remove(); document.body.appendChild(ov);
+    };
+  };
+
   PAGINE.sfida = (a, b) => {
     const opz = sel => `<option value="">— scegli —</option>${S.giocatori.slice().sort((x, y) => x.nome.localeCompare(y.nome)).map(p => `<option value="${p.slug}" ${p.slug === sel ? 'selected' : ''}>${esc(p.nome)}</option>`).join('')}`;
     const A = a && S.trova(a), Bb = b && S.trova(b);
@@ -309,9 +324,9 @@
       const riga = (l, va, vb, fmt = x => x, piuAlto = true) => { const wa = piuAlto ? va > vb : va < vb, wb = piuAlto ? vb > va : vb < va;
         return `<tr><td class="num" style="${wa ? 'font-weight:700;color:var(--red-d)' : ''}">${fmt(va)}</td><td style="text-align:center;font-family:var(--f-mono);font-size:12.5px;text-transform:uppercase;color:var(--ink-2)">${l}</td><td style="${wb ? 'font-weight:700;color:var(--red-d)' : ''}">${fmt(vb)}</td></tr>`; };
       corpo = `<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;text-align:center;margin:10px 0 18px">
-          <div><div class="avatar" style="margin:0 auto;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-titolo);font-size:26px;color:var(--paper);background:var(--wood-600)">${iniziali(A.nome)}</div><div style="font-family:var(--f-titolo);margin-top:6px">${lnkG(A)}</div></div>
+          <div>${avatar(A, 'avatar-sfida')}<div style="font-family:var(--f-titolo);margin-top:6px">${lnkG(A)}</div></div>
           <div class="cifra-grande">${c.aDavanti} – ${c.bDavanti}</div>
-          <div><div class="avatar" style="margin:0 auto;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--f-titolo);font-size:26px;color:var(--paper);background:var(--red-d)">${iniziali(Bb.nome)}</div><div style="font-family:var(--f-titolo);margin-top:6px">${lnkG(Bb)}</div></div></div>
+          <div>${avatar(Bb, 'avatar-sfida', 'background:var(--red-d)')}<div style="font-family:var(--f-titolo);margin-top:6px">${lnkG(Bb)}</div></div></div>
         <p class="nota" style="text-align:center;margin-top:-8px">${c.comuni.length ? `Tornei giocati insieme: ${c.comuni.length}. Il punteggio indica quante volte ciascuno è arrivato davanti all'altro.` : 'Non hanno mai giocato lo stesso torneo.'}${c.tavoli.length ? ` Si sono sfidati allo stesso tavolo ${c.tavoli.length} ${c.tavoli.length === 1 ? 'volta' : 'volte'}.` : ''}</p>
         <table class="t" style="max-width:560px;margin:0 auto"><tbody>
           ${riga('Posizione generale', A.rank, Bb.rank, x => x + '°', false)}${riga('Tornei', A.presenze, Bb.presenze)}${riga('Totale', A.totale, Bb.totale, B.fmt$)}
@@ -393,7 +408,7 @@
   const daJson = () => fetch('data/dati.json?v=' + Date.now()).then(r => r.json());
   const pronto = window.BANG_DB ? Promise.resolve(true) : new Promise(r => { window.addEventListener('bangdb', () => r(true), { once: true }); setTimeout(() => r(false), 8000); });
   pronto.then(ok => ok ? window.BANG_DB.carica().catch(daJson) : daJson()).then(d => {
-    DATI = d; S = B.calcola(DATI, filtro);
+    DATI = d; MINI = d.miniature || {}; S = B.calcola(DATI, filtro);
     if (d.config && d.config.sottotitolo) $('#tag').textContent = d.config.sottotitolo;
     render();
   }).catch(e => { $('#app').innerHTML = `<section class="carta">${vuoto('Impossibile caricare i dati: ' + esc(e.message))}</section>`; });

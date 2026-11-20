@@ -5,7 +5,7 @@
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let DATI = null, MODIFICATO = false, COLLEGATO = false, ID_CARICATI = [];
+  let DATI = null, MODIFICATO = false, COLLEGATO = false, ID_CARICATI = [], MINI = {};
   let partitaInModifica = null; // indice della partita in modifica nel torneo selezionato
   let nGiocatori = 6;
 
@@ -56,7 +56,7 @@
         const d = await DB.carica();
         COLLEGATO = true; MODIFICATO = false;
         ID_CARICATI = d._origine === 'firestore' ? d.tornei.map(t => t.id) : [];
-        DATI = { config: d.config || {}, tornei: d.tornei || [] };
+        DATI = { config: d.config || {}, tornei: d.tornei || [] }; MINI = d.miniature || {};
         const bozza = localStorage.getItem('bangTorreNera.bozza');
         if (d._origine !== 'firestore') {
           MODIFICATO = true;
@@ -102,7 +102,7 @@
   };
 
   // ---------------- pannello ----------------
-  const TABS = [['nuovo', 'Nuovo torneo'], ['tornei', 'Tornei'], ['partite', 'Partite'], ['impostazioni', 'Impostazioni']];
+  const TABS = [['nuovo', 'Nuovo torneo'], ['tornei', 'Tornei'], ['partite', 'Partite'], ['carte', 'Carte giocatori'], ['impostazioni', 'Impostazioni']];
   function avvia() {
     DATI.config = DATI.config || {}; DATI.tornei = DATI.tornei || [];
     $('#pannello').style.display = '';
@@ -114,6 +114,7 @@
     $$('[data-tab]').forEach(s => s.style.display = s.dataset.tab === k ? '' : 'none');
     $$('#tabs button').forEach(b => { b.classList.toggle('sec', b.dataset.t !== k); });
     if (k === 'partite') disegnaPartite();
+    if (k === 'carte') disegnaCarte();
   }
   function aggiornaTutto() {
     DATI.tornei.sort((a, b) => a.data.localeCompare(b.data));
@@ -316,6 +317,54 @@
     disegnaPartite();
     msg('#msg', `✔ Partita salvata (turno ${p.turno}, tavolo ${p.tavolo}).`, 'ok');
   };
+
+  // ---------------- carte dei giocatori ----------------
+  // ridimensiona l'immagine nel browser e la restituisce come JPEG (data URL)
+  function ridimensiona(file, maxH, qualita) {
+    return new Promise((ok, ko) => {
+      const img = new Image();
+      img.onload = () => {
+        const sc = Math.min(1, maxH / Math.max(img.width, img.height));
+        const w = Math.round(img.width * sc), h = Math.round(img.height * sc);
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(img.src); ok(c.toDataURL('image/jpeg', qualita));
+      };
+      img.onerror = () => ko(new Error('Immagine non leggibile'));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  function disegnaCarte() {
+    const S = B.calcola(DATI);
+    const f = B.norm($('#cercaCarte').value);
+    const arr = S.giocatori.filter(p => !f || p.key.includes(f)).sort((a, b) => (!!MINI[b.slug] - !!MINI[a.slug]) || a.nome.localeCompare(b.nome));
+    const con = S.giocatori.filter(p => MINI[p.slug]).length;
+    $('#elencoCarte').innerHTML = `<p class="nota" style="grid-column:1/-1;margin:0">${con} giocatori su ${S.giocatori.length} hanno la carta.</p>` + arr.map(p => `
+      <div class="gc"><div class="ant">${MINI[p.slug] ? `<img src="${MINI[p.slug]}" alt="">` : esc(p.nome.split(' ').map(w => w[0]).slice(0, 2).join(''))}</div>
+        <div><div class="nm">${esc(p.nome)}</div><div class="az">
+          <label class="btn sec pic">${MINI[p.slug] ? 'Cambia' : 'Carica carta'}<input type="file" accept="image/*" data-carica="${p.slug}" hidden></label>
+          ${MINI[p.slug] ? `<button class="btn sec pic" data-togli="${p.slug}">Rimuovi</button>` : ''}
+        </div></div></div>`).join('');
+    $$('[data-carica]').forEach(inp => inp.onchange = async () => {
+      const file = inp.files[0]; if (!file) return;
+      const slug = inp.dataset.carica;
+      msg('#msg', 'Carico la carta…');
+      try {
+        let img = await ridimensiona(file, 800, 0.85);
+        if (img.length > 850000) img = await ridimensiona(file, 600, 0.75);
+        const mini = await ridimensiona(file, 160, 0.8);
+        await window.BANG_DB.salvaCarta(slug, img, mini);
+        MINI[slug] = mini; disegnaCarte();
+        msg('#msg', '✔ Carta salvata: è già visibile sul sito.', 'ok');
+      } catch (e) { msg('#msg', 'Carta non salvata: ' + errore(e), 'err'); }
+    });
+    $$('[data-togli]').forEach(b => b.onclick = async () => {
+      if (!confirm('Rimuovere la carta di questo giocatore?')) return;
+      try { await window.BANG_DB.eliminaCarta(b.dataset.togli); delete MINI[b.dataset.togli]; disegnaCarte(); msg('#msg', '✔ Carta rimossa.', 'ok'); }
+      catch (e) { msg('#msg', 'Errore: ' + errore(e), 'err'); }
+    });
+  }
+  $('#cercaCarte').oninput = disegnaCarte;
 
   // ---------------- impostazioni ----------------
   $('#btnSalvaImp').onclick = () => {
