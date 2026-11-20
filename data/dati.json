@@ -1,0 +1,219 @@
+{
+ "versione": 1,
+ "config": {
+  "titolo": "Bang! alla Torre Nera",
+  "sottotitolo": "Statistiche dei tornei del Campionato Nazionale – La Torre Nera, Osimo",
+  "meseInizioStagione": 9,
+  "minPresenzeMedia": 2,
+  "linkRegolamento": "https://www.dvgames.com/bang_champ/MaterialeCampionato/RegolamentoDaTorneo.pdf",
+  "linkScheda": "https://www.dvgames.com/bang_champ/MaterialeCampionato/Bang!_Scheda-Di-Gioco.pdf",
+  "conDuello": false
+ },
+ "tornei": [
+  {
+   "id": "2026-11-08-centro-fiere-villa-potenza",
+   "data": "2026-11-08",
+   "sede": "Centro Fiere Villa Potenza",
+   "codice": "",
+   "note": "",
+   "classifica": [
+    {
+     "pos": 1,
+     "nome": "GABRIELE FRANCIONI",
+     "dollari": 6230
+    },
+    {
+     "pos": 2,
+     "nome": "ALESSIO FRANCIONI",
+     "dollari": 5310
+    },
+    {
+     "pos": 3,
+     "nome": "MAURO CARLONI",
+     "dollari": 5220
+    },
+    {
+     "pos": 4,
+     "nome": "GIADA BILANCIA",
+     "dollari": 5040
+    },
+    {
+     "pos": 5,
+     "nome": "EMANUELE GABRIELLONI",
+     "dollari": 4830
+    },
+    {
+     "pos": 6,
+     "nome": "DANIELE ANTONELLI",
+     "dollari": 3480
+    },
+    {
+     "pos": 7,
+     "nome": "CARLO CATENA",
+     "dollari": 3360
+    },
+    {
+     "pos": 8,
+     "nome": "CLAUDIO PIZZO",
+     "dollari": 3050
+    },
+    {
+     "pos": 9,
+     "nome": "MARTINA GATTI",
+     "dollari": 1670
+    },
+    {
+     "pos": 10,
+     "nome": "ELISA FUSINI",
+     "dollari": 1520
+    },
+    {
+     "pos": 11,
+     "nome": "ANDREA PESARESI",
+     "dollari": 360
+    },
+    {
+     "pos": 12,
+     "nome": "PAOLO PIERMARINI",
+     "dollari": 350
+    },
+    {
+     "pos": 13,
+     "nome": "CLAUDIO MARIO FALCONIO",
+     "dollari": 340
+    },
+    {
+     "pos": 14,
+     "nome": "GIACOMO LENONI",
+     "dollari": 310
+    },
+    {
+     "pos": 15,
+     "nome": "GIOELE CARTECHINI",
+     "dollari": 300
+    },
+    {
+     "pos": 16,
+     "nome": "GERMANO GUARDATI",
+     "dollari": 270
+    },
+    {
+     "pos": 17,
+     "nome": "DANIELA FASCIOLI",
+     "dollari": 240
+    }
+   ],
+   "partite": []
+  },
+  {
+   "id": "2026-11-19-la-torre-nera-osimo",
+   "data": "2026-11-19",
+   "sede": "La Torre Nera - Osimo",
+   "codice": "262970048",
+   "note": "",
+   "classifica": [
+    {
+     "pos": 1,
+     "nome": "ALESSIO FIORANI",
+     "dollari": 5260
+    },
+    {
+     "pos": 2,
+     "nome": "GESSICA VALERIANI",
+     "dollari": 4660
+    },
+    {
+     "pos": 3,
+     "nome": "COSIMO LOMARTIRE",
+     "dollari": 4550
+    },
+    {
+     "pos": 4,
+     "nome": "MICHELE RAPONI",
+     "dollari": 3760
+    },
+    {
+     "pos": 5,
+     "nome": "SARA RONCHI",
+     "dollari": 3360
+    },
+    {
+     "pos": 6,
+     "nome": "ALESSANDRO ABIDI",
+     "dollari": 3330
+    },
+    {
+     "pos": 7,
+     "nome": "ELENA MARTORELLI",
+     "dollari": 2950
+    },
+    {
+     "pos": 8,
+     "nome": "SAMUELE VALENTI",
+     "dollari": 2870
+    },
+    {
+     "pos": 9,
+     "nome": "ANDREA PESARESI",
+     "dollari": 2740
+    },
+    {
+     "pos": 10,
+     "nome": "MAURO CARLONI",
+     "dollari": 2690
+    },
+    {
+     "pos": 11,
+     "nome": "FRANCESCO MARIA DI PIERANTONIO",
+     "dollari": 2460
+    },
+    {
+     "pos": 12,
+     "nome": "CARLO CATENA",
+     "dollari": 2160
+    },
+    {
+     "pos": 13,
+     "nome": "MATTEO CESARETTI",
+     "dollari": 2120
+    },
+    {
+     "pos": 14,
+     "nome": "SEBASTIANO BRANDIMARTI",
+     "dollari": 1860
+    },
+    {
+     "pos": 15,
+     "nome": "SAMUELE AGOSTINELLI",
+     "dollari": 1860
+    },
+    {
+     "pos": 16,
+     "nome": "EMANUELE GABRIELLONI",
+     "dollari": 1820
+    },
+    {
+     "pos": 17,
+     "nome": "CLAUDIO AGOSTINELLI",
+     "dollari": 1550
+    },
+    {
+     "pos": 18,
+     "nome": "MARGARETA GIULIANI",
+     "dollari": 1540
+    },
+    {
+     "pos": 19,
+     "nome": "MARIA CARMEN AMODEO",
+     "dollari": 1540
+    },
+    {
+     "pos": 20,
+     "nome": "ENRICO RIDOLFI",
+     "dollari": 190
+    }
+   ],
+   "partite": []
+  }
+ ]
+}

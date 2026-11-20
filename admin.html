@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Ufficio dello Sceriffo · Gestione dati</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6 L61 36 L94 36 L67 56 L77 90 L50 70 L23 90 L33 56 L6 36 L39 36 Z' fill='%23a8231d' stroke='%234a3210' stroke-width='4'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,700;1,400&family=Rye&family=Sancreek&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .campo{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+  .campo > span{font-family:var(--f-mono);font-size:12.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-2)}
+  .in{padding:8px 10px;border-radius:4px;border:2px solid var(--paper-edge);background:#fbf3df;color:var(--ink);font-family:var(--f-testo);font-size:15px;width:100%}
+  .in:focus{outline:2px solid var(--red);outline-offset:1px}
+  textarea.in{min-height:220px;font-family:var(--f-mono);font-size:13.5px}
+  .riga{display:grid;gap:12px}
+  .r2{grid-template-columns:1fr 1fr}.r3{grid-template-columns:1fr 1fr 1fr}.r4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:700px){.r2,.r3,.r4{grid-template-columns:1fr}}
+  .schede-tab{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+  .avviso{padding:10px 14px;border-radius:4px;margin:10px 0;font-size:14.5px}
+  .avviso.ok{background:#e3ecd2;border:1px solid #7c9a55;color:#2d4a14}
+  .avviso.err{background:#f6d9d3;border:1px solid var(--red);color:var(--red-d)}
+  .avviso.info{background:#f3e9cf;border:1px solid var(--paper-edge);color:var(--ink-2)}
+  .barra-stato{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,#3a2415,#24160d);border-bottom:3px solid #120a05;box-shadow:0 8px 18px -8px #000}
+  .barra-stato .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px}
+  .barra-stato .tit{font-family:var(--f-titolo);color:var(--gold-l);font-size:20px;margin-right:auto}
+  .pallino{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:#777}
+  .pallino.on{background:#7fc15a}.pallino.mod{background:var(--gold-l)}
+  .stato{color:var(--paper-2);font-size:14px}
+  table.scheda td{padding:4px 5px;vertical-align:middle}
+  table.scheda .in{padding:6px 7px;font-size:14px}
+  .esiti{display:flex;flex-wrap:wrap;gap:8px}
+  .esiti label,.smz label{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:2px solid var(--paper-edge);border-radius:4px;background:#fbf3df;cursor:pointer;font-size:14px}
+  .esiti input:checked + span,.smz input:checked + span{font-weight:700;color:var(--red-d)}
+  .smz{display:flex;gap:6px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-family:var(--f-mono)}
+  .pill.ok{background:#d7e6c2;color:#2d4a14}.pill.ko{background:#f3cfc8;color:var(--red-d)}
+  details summary{cursor:pointer;font-family:var(--f-titolo);font-size:16px;margin:6px 0}
+  #msg{position:fixed;right:18px;bottom:18px;z-index:60;max-width:420px}
+  #msg .avviso{box-shadow:0 8px 24px rgba(0,0,0,.5);margin:0}
+  .x{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px}
+</style>
+</head>
+<body>
+<div class="barra-stato"><div class="wrap">
+  <span class="tit">★ Ufficio dello Sceriffo</span>
+  <span class="stato" id="stato"><span class="pallino"></span>Non collegato</span>
+  <button class="btn" id="btnPubblica" disabled>Pubblica sul sito</button>
+  <a class="btn sec pic" href="./">Vai al sito</a>
+</div></div>
+
+<main><div class="wrap">
+  <section class="carta chiodi" id="secAccesso">
+    <h2><span class="kicker">Solo per lo Sceriffo</span>Accesso</h2>
+    <p>Per salvare serve un <b>token GitHub</b> con permesso di scrittura sul repository del sito. Senza token puoi guardare, ma non pubblicare nulla: è questo che garantisce che solo tu possa inserire i dati.</p>
+    <div class="riga r4">
+      <label class="campo"><span>Utente GitHub</span><input class="in" id="ghOwner" placeholder="es. mariorossi"></label>
+      <label class="campo"><span>Repository</span><input class="in" id="ghRepo" placeholder="es. bang-torre-nera"></label>
+      <label class="campo"><span>Branch</span><input class="in" id="ghBranch" value="main"></label>
+      <label class="campo"><span>Token</span><input class="in" id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></label>
+    </div>
+    <label style="font-size:14px"><input type="checkbox" id="ricorda" checked> Ricorda su questo dispositivo</label>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="btnCollega">Collegati e carica i dati</button>
+      <button class="btn sec" id="btnOffline">Lavora senza collegarti</button>
+      <button class="btn sec" id="btnEsci">Dimentica token</button>
+    </div>
+    <div id="msgAccesso"></div>
+  </section>
+
+  <div id="pannello" style="display:none;margin-top:22px">
+    <div class="schede-tab" id="tabs"></div>
+
+    <!-- NUOVO TORNEO -->
+    <section class="carta" data-tab="nuovo">
+      <h2><span class="kicker">Incolla la mail con l'esito</span>Nuovo torneo</h2>
+      <p class="nota" style="margin-top:-6px">Incolla il testo così com'è (anche con la frase "svolto in data … presso …"): data, sede, codice e classifica vengono riconosciuti da soli. Controlla l'anteprima e poi aggiungi.</p>
+      <label class="campo"><span>Testo risultati</span><textarea class="in" id="incolla" placeholder="Inviamo l'esito del torneo codice 262970048 svolto in data 19/11/2026 presso LA TORRE NERA OSIMO.
+1°	ALESSIO FIORANI	5.260
+2°	GESSICA VALERIANI	4.660
+…"></textarea></label>
+      <div class="riga r4">
+        <label class="campo"><span>Data</span><input class="in" type="date" id="nData"></label>
+        <label class="campo"><span>Sede</span><input class="in" id="nSede" list="dlSedi" value="La Torre Nera - Osimo"></label>
+        <label class="campo"><span>Codice torneo</span><input class="in" id="nCodice"></label>
+        <label class="campo"><span>Turni (vuoto = automatico)</span><input class="in" type="number" min="1" max="9" id="nTurni"></label>
+      </div>
+      <label class="campo"><span>Note (facoltative)</span><input class="in" id="nNote"></label>
+      <div id="anteprima"></div>
+      <button class="btn" id="btnAggiungi" disabled>Aggiungi torneo</button>
+    </section>
+
+    <!-- TORNEI -->
+    <section class="carta" data-tab="tornei">
+      <h2>Tornei inseriti</h2>
+      <div id="elencoTornei"></div>
+    </section>
+
+    <!-- PARTITE -->
+    <section class="carta" data-tab="partite">
+      <h2><span class="kicker">Facoltativo · dalla Scheda di gioco</span>Partite</h2>
+      <div class="riga r3">
+        <label class="campo"><span>Torneo</span><select class="in" id="pTorneo"></select></label>
+        <label class="campo"><span>Turno n.</span><input class="in" type="number" min="1" id="pTurno" value="1"></label>
+        <label class="campo"><span>Tavolo n.</span><input class="in" type="number" min="1" id="pTavolo" value="1"></label>
+      </div>
+      <div class="campo"><span>Chi ha vinto?</span><div class="esiti" id="pEsito"></div></div>
+      <div class="campo"><span>Smazzate (caselle spuntate)</span><div class="smz" id="pSmazzate"></div></div>
+      <div class="campo"><span>Giocatori al tavolo</span>
+        <div style="display:flex;gap:6px;margin-bottom:6px" id="pNum"><button class="btn sec pic" data-n="5">5 giocatori</button><button class="btn sec pic" data-n="6">6 giocatori</button><button class="btn sec pic" data-n="7">7 giocatori</button></div>
+        <div class="tab-wrap"><table class="t scheda"><thead><tr><th>#</th><th>Giocatore</th><th>Personaggio</th><th>Ruolo</th><th class="num">$ pagati asta</th><th class="num">$ vinti</th></tr></thead><tbody id="pRighe"></tbody></table></div>
+      </div>
+      <div id="pAvvisi"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="btnSalvaPartita">Salva partita</button><button class="btn sec" id="btnNuovaPartita">Svuota scheda</button></div>
+      <h3 style="margin-top:26px">Partite di questo torneo</h3>
+      <div id="elencoPartite"></div>
+      <h3 style="margin-top:26px">Verifica punteggi</h3>
+      <div id="verifica"></div>
+    </section>
+
+    <!-- IMPOSTAZIONI -->
+    <section class="carta" data-tab="impostazioni">
+      <h2>Impostazioni</h2>
+      <div class="riga r2">
+        <label class="campo"><span>Titolo del sito</span><input class="in" id="cTitolo"></label>
+        <label class="campo"><span>Sottotitolo</span><input class="in" id="cSottotitolo"></label>
+      </div>
+      <div class="riga r3">
+        <label class="campo"><span>Mese di inizio stagione (1-12)</span><input class="in" type="number" min="1" max="12" id="cMese"></label>
+        <label class="campo"><span>Tornei minimi per "miglior media"</span><input class="in" type="number" min="1" id="cMin"></label>
+      </div>
+      <button class="btn sec" id="btnSalvaImp">Applica</button>
+      <h3 style="margin-top:24px">Unisci due nomi</h3>
+      <p class="nota">Se lo stesso giocatore compare scritto in due modi (es. un refuso), sostituisci il nome sbagliato con quello giusto in tutti i tornei e partite.</p>
+      <div class="riga r3">
+        <label class="campo"><span>Nome sbagliato</span><input class="in" id="aliasDa" list="dlGiocatori"></label>
+        <label class="campo"><span>Nome corretto</span><input class="in" id="aliasA" list="dlGiocatori"></label>
+        <div class="campo"><span>&nbsp;</span><button class="btn sec" id="btnAlias">Unisci</button></div>
+      </div>
+      <h3 style="margin-top:24px">Backup</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn sec" id="btnScarica">Scarica dati.json</button>
+        <label class="btn sec">Carica un backup<input type="file" id="fileBackup" accept=".json" hidden></label>
+      </div>
+    </section>
+  </div>
+  <div id="msg"></div>
+</div></main>
+
+<datalist id="dlSedi"></datalist>
+<datalist id="dlGiocatori"></datalist>
+<datalist id="dlPersonaggi"></datalist>
+<script src="js/stats.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

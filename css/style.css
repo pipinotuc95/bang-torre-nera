@@ -1,0 +1,221 @@
+/* ============ Bang! alla Torre Nera — tema western ============ */
+:root{
+  --wood-950:#140c07; --wood-900:#1d120b; --wood-800:#2b1b11; --wood-700:#3d2718; --wood-600:#5a3a22;
+  --paper:#f4e6c6; --paper-2:#ead6a9; --paper-3:#dcc28c; --paper-edge:#b8935a;
+  --ink:#2b1a10; --ink-2:#5a3d28; --muted:#86684a;
+  --red:#a8231d; --red-d:#7d1813; --gold:#c8962a; --gold-l:#e9c46a; --gold-d:#8f6614;
+  --legge:#c08a1e; --fuorilegge:#a8231d; --rinnegato:#2f5d8a;
+  --ok:#3f6b2a;
+  --f-titolo:'Rye','Georgia',serif;
+  --f-wanted:'Sancreek','Rye','Georgia',serif;
+  --f-testo:'Bitter','Georgia',serif;
+  --f-mono:'Special Elite','Courier New',monospace;
+  --r:6px;
+  --ombra:0 2px 0 rgba(0,0,0,.25),0 12px 30px -10px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--paper); font-family:var(--f-testo); font-size:16px; line-height:1.5;
+  background-color:var(--wood-900);
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(233,196,106,.16), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.0) 0 2px, rgba(0,0,0,.12) 2px 3px, rgba(0,0,0,0) 3px 9px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0 1px, transparent 1px 140px),
+    linear-gradient(180deg, var(--wood-800), var(--wood-950));
+  background-attachment:fixed;
+  min-height:100vh;
+}
+a{color:inherit}
+img{max-width:100%}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+
+/* ---------- testata ---------- */
+.testata{position:relative;padding:22px 0 0;text-align:center;overflow:hidden}
+.testata::before{ /* sole al tramonto */
+  content:"";position:absolute;left:50%;top:-140px;width:520px;height:520px;transform:translateX(-50%);
+  background:radial-gradient(circle, rgba(233,196,106,.28), rgba(200,150,42,.08) 45%, transparent 66%);pointer-events:none}
+.loghi{display:flex;align-items:center;justify-content:center;gap:28px;position:relative;z-index:1;flex-wrap:wrap}
+.loghi img{height:120px;width:auto;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))}
+.loghi img.dv{height:84px}
+.loghi img.tn{height:110px}
+.marchio{position:relative;z-index:1;margin:6px 0 0}
+.marchio .bang{font-family:var(--f-wanted);font-size:clamp(46px,8vw,92px);line-height:.95;color:var(--red);
+  letter-spacing:2px;text-shadow:3px 3px 0 var(--gold-l),6px 6px 0 rgba(0,0,0,.55);transform:rotate(-2deg);display:inline-block}
+.marchio .sub{display:block;font-family:var(--f-titolo);color:var(--gold-l);font-size:clamp(16px,2.4vw,24px);letter-spacing:3px;margin-top:6px;text-shadow:0 2px 0 #000}
+.marchio .tag{display:block;color:var(--paper-3);font-style:italic;font-size:14px;margin-top:4px;opacity:.85}
+
+/* ---------- navigazione a insegne ---------- */
+nav.insegne{position:sticky;top:0;z-index:20;margin-top:18px;background:linear-gradient(180deg,#3a2415,#24160d);
+  border-top:3px solid #120a05;border-bottom:3px solid #120a05;box-shadow:0 8px 18px -8px #000}
+nav.insegne .wrap{display:flex;gap:6px;overflow-x:auto;padding:8px 18px;scrollbar-width:none}
+nav.insegne a{flex:0 0 auto;text-decoration:none;font-family:var(--f-titolo);font-size:15px;letter-spacing:1px;color:var(--paper-2);
+  padding:7px 14px;border-radius:4px;border:1px solid transparent;transition:.15s}
+nav.insegne a:hover{background:rgba(233,196,106,.1);border-color:rgba(233,196,106,.25)}
+nav.insegne a.on{background:linear-gradient(180deg,var(--paper),var(--paper-2));color:var(--ink);border-color:var(--paper-edge);
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
+
+main{padding:26px 0 60px}
+
+/* ---------- carta / pergamena ---------- */
+.carta{position:relative;color:var(--ink);border-radius:var(--r);padding:22px 22px;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(255,255,255,.45), transparent 50%),
+    radial-gradient(ellipse at 90% 100%, rgba(140,90,30,.22), transparent 55%),
+    linear-gradient(180deg,var(--paper),var(--paper-2));
+  box-shadow:var(--ombra), inset 0 0 0 1px rgba(120,80,30,.35), inset 0 0 40px rgba(120,70,20,.22)}
+.carta + .carta{margin-top:22px}
+.griglia > .carta{margin-top:0}
+.carta h2,.carta h3{font-family:var(--f-titolo);font-weight:400;color:var(--ink);margin:0 0 14px;letter-spacing:.5px}
+.carta h2{font-size:26px}
+.carta h3{font-size:19px}
+.carta h2 .kicker{display:block;font-family:var(--f-mono);font-size:13px;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px}
+.titolo-sezione{font-family:var(--f-titolo);color:var(--gold-l);font-size:30px;margin:6px 0 16px;text-shadow:0 2px 0 #000;display:flex;align-items:center;gap:12px}
+.titolo-sezione::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--gold),transparent)}
+.chiodi::before,.chiodi::after{content:"";position:absolute;top:10px;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#d9c7a0,#5b4630 60%,#2a1d12);box-shadow:0 1px 1px rgba(0,0,0,.5)}
+.chiodi::before{left:10px}.chiodi::after{right:10px}
+
+.griglia{display:grid;gap:22px;align-items:start}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-12{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+@media (max-width:900px){.g2,.g3,.g-12{grid-template-columns:1fr}}
+
+/* ---------- tessere KPI (stelle da sceriffo) ---------- */
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:22px}
+.kpi .k{position:relative;text-align:center;padding:18px 10px 14px;border-radius:var(--r);color:var(--ink);
+  background:linear-gradient(180deg,var(--paper),var(--paper-2));box-shadow:var(--ombra),inset 0 0 0 1px rgba(120,80,30,.35)}
+.kpi .k .v{font-family:var(--f-titolo);font-size:34px;line-height:1.1;color:var(--red-d)}
+.kpi .k .l{font-family:var(--f-mono);font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-2)}
+.kpi .k .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+/* ---------- podio ---------- */
+.podio{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:12px;margin:8px 0 4px}
+.podio .p{text-align:center}
+.podio .nome{font-family:var(--f-titolo);font-size:16px;line-height:1.15;margin:6px 0 2px;min-height:2.3em;display:flex;align-items:flex-end;justify-content:center}
+.podio .nome a{text-decoration:none}
+.podio .nome a:hover{color:var(--red)}
+.podio .soldi{font-family:var(--f-mono);color:var(--ink-2);font-size:14px}
+.podio .gradino{margin-top:8px;border-radius:4px 4px 0 0;font-family:var(--f-wanted);color:var(--paper);font-size:30px;
+  display:flex;align-items:flex-start;justify-content:center;padding-top:6px;
+  background:repeating-linear-gradient(90deg,#6b4325 0 18px,#5a381e 18px 20px);box-shadow:inset 0 3px 0 rgba(255,255,255,.15),inset 0 -6px 12px rgba(0,0,0,.35)}
+.podio .p1 .gradino{height:120px;background:repeating-linear-gradient(90deg,#9c6f1c 0 18px,#87601a 18px 20px)}
+.podio .p2 .gradino{height:86px}
+.podio .p3 .gradino{height:62px}
+.stella{width:44px;height:44px;display:inline-block}
+.podio .p1 .stella{width:58px;height:58px}
+
+/* ---------- tabelle ---------- */
+.tab-wrap{overflow-x:auto;margin:0 -6px;padding:0 6px}
+table.t{width:100%;border-collapse:collapse;font-size:15px}
+table.t th{font-family:var(--f-mono);font-weight:400;font-size:12.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);
+  text-align:left;padding:8px 8px;border-bottom:2px solid var(--ink-2);white-space:nowrap}
+table.t th.num,table.t td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.t th[data-k]{cursor:pointer;user-select:none}
+table.t th[data-k]:hover{color:var(--red)}
+table.t th.ord::after{content:" ▼";font-size:10px;color:var(--red)}
+table.t th.ord.asc::after{content:" ▲"}
+table.t td{padding:7px 8px;border-bottom:1px dashed rgba(90,61,40,.35)}
+table.t tbody tr:hover td{background:rgba(168,35,29,.07)}
+table.t td a{text-decoration:none;font-weight:600}
+table.t td a:hover{color:var(--red);text-decoration:underline}
+.pos{font-family:var(--f-titolo);font-size:17px;width:44px}
+.pos.oro{color:var(--gold-d)}.pos.arg{color:#6f6f6f}.pos.bro{color:#8a4f22}
+.dim{color:var(--muted)}
+.mini{font-size:13px}
+
+/* barra indice piazzamento */
+.barretta{display:inline-block;vertical-align:middle;width:70px;height:7px;border-radius:4px;background:rgba(90,61,40,.18);margin-left:6px;overflow:hidden}
+.barretta i{display:block;height:100%;border-radius:4px;background:var(--red)}
+
+/* ---------- etichette ruolo ---------- */
+.ruolo{display:inline-flex;align-items:center;gap:4px;font-family:var(--f-mono);font-size:12px;letter-spacing:.5px;
+  padding:1px 7px;border-radius:3px;color:#fff;white-space:nowrap}
+.ruolo.sceriffo{background:var(--legge)}
+.ruolo.vice{background:#9a7a3a}
+.ruolo.fuorilegge{background:var(--fuorilegge)}
+.ruolo.rinnegato{background:var(--rinnegato)}
+.chip{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:2px 8px;border-radius:20px;border:1px solid var(--paper-edge);background:rgba(255,255,255,.35);color:var(--ink-2)}
+
+/* ---------- elenco tornei (manifesti) ---------- */
+.manifesti{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+.manifesto{display:block;text-decoration:none;color:var(--ink);text-align:center;padding:20px 16px 18px;transform:rotate(var(--rot,0deg));transition:transform .2s}
+.manifesto:hover{transform:rotate(0) translateY(-4px)}
+.manifesto .wanted{font-family:var(--f-wanted);font-size:30px;color:var(--red-d);letter-spacing:2px;line-height:1}
+.manifesto .quando{font-family:var(--f-mono);font-size:13px;color:var(--ink-2);margin:6px 0 10px;letter-spacing:1px}
+.manifesto .dove{font-family:var(--f-titolo);font-size:18px;line-height:1.2;margin-bottom:10px}
+.manifesto .vinc{border-top:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);padding:8px 0;margin:10px 0}
+.manifesto .vinc b{display:block;font-family:var(--f-titolo);font-weight:400;font-size:20px}
+.manifesto .reward{font-family:var(--f-wanted);font-size:24px;color:var(--ink)}
+.manifesto .meta{font-size:13px;color:var(--muted)}
+
+/* ---------- giocatori ---------- */
+.cerca{width:100%;max-width:420px;padding:10px 14px;border-radius:4px;border:2px solid var(--paper-edge);background:var(--paper);
+  font-family:var(--f-testo);font-size:16px;color:var(--ink)}
+.schede-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:16px}
+.scheda-g{display:flex;gap:12px;align-items:center;text-decoration:none;padding:12px 14px}
+.scheda-g .avatar{flex:0 0 46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-titolo);font-size:18px;color:var(--paper);background:var(--wood-600);box-shadow:inset 0 0 0 3px var(--paper-3)}
+.scheda-g .n{font-family:var(--f-titolo);font-size:15px;line-height:1.15}
+.scheda-g .d{font-size:12.5px;color:var(--muted)}
+.scheda-g:hover{outline:2px solid var(--red)}
+
+/* profilo */
+.profilo-testa{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.profilo-testa .avatar{width:96px;height:96px;font-size:36px;flex:0 0 96px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-titolo);color:var(--paper);background:var(--wood-600);box-shadow:inset 0 0 0 5px var(--paper-3),0 4px 10px rgba(0,0,0,.35)}
+.profilo-testa h1{font-family:var(--f-wanted);font-weight:400;font-size:clamp(30px,5vw,46px);margin:0;line-height:1;color:var(--red-d)}
+.profilo-testa .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+/* ---------- grafici ---------- */
+.grafico{width:100%;height:auto;display:block;overflow:visible}
+.grafico text{font-family:var(--f-mono);font-size:12px;fill:var(--ink-2)}
+.grafico .asse{stroke:rgba(90,61,40,.5);stroke-width:1}
+.grafico .griglia-l{stroke:rgba(90,61,40,.16);stroke-width:1}
+.grafico .linea{fill:none;stroke:var(--red);stroke-width:2}
+.grafico .punto{fill:var(--red);stroke:var(--paper);stroke-width:2}
+.grafico .hit{fill:transparent;cursor:pointer}
+.grafico .bar{fill:var(--red)}
+.grafico .bar:hover,.grafico .hit:hover + .punto{opacity:.8}
+.legenda{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-top:8px}
+.legenda i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.tooltip{position:fixed;z-index:50;pointer-events:none;background:var(--wood-900);color:var(--paper);border:1px solid var(--gold);
+  font-size:13px;padding:6px 9px;border-radius:4px;box-shadow:0 6px 16px rgba(0,0,0,.5);display:none;max-width:260px}
+
+/* barre orizzontali in html */
+.hbar{display:grid;grid-template-columns:minmax(90px,170px) 1fr auto;gap:8px 10px;align-items:center;font-size:14px}
+.hbar .tr{height:14px;background:rgba(90,61,40,.14);border-radius:0 4px 4px 0}
+.hbar .tr i{display:block;height:100%;border-radius:0 4px 4px 0}
+.hbar .val{font-family:var(--f-mono);font-size:13px;color:var(--ink-2);white-space:nowrap}
+
+/* filtri */
+.filtri{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.filtri label{font-family:var(--f-mono);font-size:12.5px;color:var(--paper-2);letter-spacing:1px;text-transform:uppercase}
+select,input,textarea,button{font:inherit}
+.filtri select,.sel{padding:7px 10px;border-radius:4px;border:2px solid var(--paper-edge);background:var(--paper);color:var(--ink)}
+
+.vuoto{text-align:center;padding:30px 16px;color:var(--ink-2)}
+.vuoto .cactus{font-size:42px;display:block}
+.nota{font-size:13.5px;color:var(--muted);font-style:italic}
+.cifra-grande{font-family:var(--f-wanted);font-size:44px;color:var(--red-d);line-height:1}
+
+.btn{display:inline-block;cursor:pointer;text-decoration:none;font-family:var(--f-titolo);letter-spacing:1px;font-size:15px;
+  padding:9px 16px;border-radius:4px;border:2px solid var(--red-d);background:linear-gradient(180deg,#bf2b23,var(--red-d));color:#fff;
+  box-shadow:0 3px 0 #4d0e0b}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #4d0e0b}
+.btn.sec{background:linear-gradient(180deg,var(--paper),var(--paper-2));color:var(--ink);border-color:var(--paper-edge);box-shadow:0 3px 0 #8a6a3c}
+.btn.pic{font-size:13px;padding:5px 10px}
+
+footer{text-align:center;color:var(--paper-3);font-size:13px;padding:30px 0 40px;opacity:.8}
+footer a{color:var(--gold-l)}
+footer .sep{display:block;margin:0 auto 14px;width:140px;height:14px;
+  background:radial-gradient(circle,var(--gold) 2px,transparent 3px) 0 50%/14px 14px repeat-x}
+
+@media (max-width:600px){
+  .carta{padding:16px 14px}
+  .loghi img{height:84px}.loghi img.dv{height:56px}
+  .podio .nome{font-size:13.5px}
+  .kpi .k .v{font-size:27px}
+}
