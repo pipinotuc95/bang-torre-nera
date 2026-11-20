@@ -21,11 +21,11 @@
   const b64enc = str => { const by = new TextEncoder().encode(str); let s = ''; for (let i = 0; i < by.length; i += 0x8000) s += String.fromCharCode.apply(null, by.subarray(i, i + 0x8000)); return btoa(s); };
   const b64dec = b => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g, '')), c => c.charCodeAt(0)));
   const idTorneo = t => `${t.data}-${B.slug(t.sede)}`;
-  const cfgGH = () => ({ owner: $('#ghOwner').value.trim(), repo: $('#ghRepo').value.trim(), branch: $('#ghBranch').value.trim() || 'main', token: $('#ghToken').value.trim() });
+  const cfgGH = () => ({ owner: $('#ghOwner').value.trim(), repo: $('#ghRepo').value.trim(), branch: $('#ghBranch').value.trim() || 'main', token: $('#ghToken').value.replace(/\s+/g, '') });
   const api = (path, opt = {}) => {
     const c = cfgGH();
     return fetch(`https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/${path}`, Object.assign({
-      headers: { Authorization: 'Bearer ' + c.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+      headers: { Authorization: 'Bearer ' + c.token, Accept: 'application/vnd.github+json' }, cache: 'no-store'
     }, opt));
   };
 
@@ -69,7 +69,10 @@
       $('#secAccesso').style.display = 'none';
       msg('#msgAccesso', `✔ Collegato a <b>${esc(c.owner)}/${esc(c.repo)}</b>. Dati caricati.`, 'ok');
       avvia();
-    } catch (e) { msg('#msgAccesso', esc(e.message), 'err'); }
+    } catch (e) {
+      const bloccato = e instanceof TypeError && /fetch|network|load/i.test(e.message);
+      msg('#msgAccesso', bloccato ? 'Il browser non riesce a raggiungere <b>api.github.com</b>: di solito lo blocca un blocco pubblicità o la protezione del browser (es. Brave Shields). Disattivalo per questa pagina e riprova.' : esc(e.message), 'err');
+    }
   };
   $('#btnOffline').onclick = async () => {
     try {
@@ -93,7 +96,7 @@
       const j = await r.json(); SHA = j.content.sha; MODIFICATO = false;
       localStorage.removeItem('bangTorreNera.bozza');
       msg('#msg', '✔ Pubblicato! Il sito si aggiorna da solo entro 1-2 minuti.', 'ok');
-    } catch (e) { msg('#msg', esc(e.message), 'err'); btn.disabled = false; }
+    } catch (e) { msg('#msg', e instanceof TypeError ? 'Connessione a GitHub bloccata o assente: controlla internet / blocco pubblicità e riprova.' : esc(e.message), 'err'); btn.disabled = false; }
     btn.textContent = 'Pubblica sul sito'; aggiornaStato();
   };
 
