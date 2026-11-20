@@ -31,13 +31,13 @@
 
   function segnaModifica() {
     MODIFICATO = true;
-    $('#btnPubblica').disabled = !COLLEGATO;
+    $('#btnPubblica').disabled = false;
     aggiornaStato();
     try { localStorage.setItem('bangTorreNera.bozza', JSON.stringify(DATI)); } catch (e) { /* niente */ }
   }
   function aggiornaStato() {
     const p = MODIFICATO ? 'mod' : COLLEGATO ? 'on' : '';
-    const t = COLLEGATO ? (MODIFICATO ? 'Modifiche da pubblicare' : 'Collegato · tutto pubblicato') : (DATI ? (MODIFICATO ? 'Modifiche locali (non collegato: scarica il backup)' : 'Modalità solo lettura') : 'Non collegato');
+    const t = COLLEGATO ? (MODIFICATO ? 'Modifiche da pubblicare' : 'Collegato · tutto pubblicato') : (DATI ? (MODIFICATO ? 'Modifiche da pubblicare (manuale)' : 'Senza collegamento') : 'Non collegato');
     $('#stato').innerHTML = `<span class="pallino ${p}"></span>${t}`;
   }
   window.addEventListener('beforeunload', e => { if (MODIFICATO) { e.preventDefault(); e.returnValue = ''; } });
@@ -87,15 +87,36 @@
   $('#btnOffline').onclick = async () => {
     try {
       const r = await fetch(FILE + '?v=' + Date.now()); DATI = await r.json(); COLLEGATO = false; MODIFICATO = false;
+      const bozza = localStorage.getItem('bangTorreNera.bozza');
+      if (bozza && bozza !== JSON.stringify(DATI) && confirm('Ho trovato delle modifiche non ancora pubblicate su questo dispositivo. Vuoi riprenderle?')) { DATI = JSON.parse(bozza); MODIFICATO = true; }
       $('#secAccesso').style.display = 'none';
-      msg('#msg', 'Modalità senza collegamento: puoi provare le modifiche e scaricare il file dati.json, ma non pubblicarlo.', 'info');
+      msg('#msg', 'Modalità senza collegamento: inserisci i dati e poi premi <b>Pubblica sul sito</b>, ti guido io a salvarli su GitHub.', 'info');
       avvia();
     } catch (e) { msg('#msgAccesso', 'Non riesco a leggere ' + FILE + ': ' + esc(e.message), 'err'); }
   };
   $('#btnEsci').onclick = () => { localStorage.removeItem(LS); $('#ghToken').value = ''; msg('#msgAccesso', 'Token dimenticato su questo dispositivo.', 'info'); };
 
+  // pubblicazione manuale: copia i dati e apre l'editor di GitHub sul file dati.json
+  async function pubblicaManuale() {
+    DATI.aggiornato = new Date().toISOString();
+    const testo = JSON.stringify(DATI, null, 1) + '\n';
+    let copiato = false;
+    try { await navigator.clipboard.writeText(testo); copiato = true; } catch (e) { /* niente */ }
+    const c = cfgGH();
+    const url = c.owner && c.repo ? `https://github.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/edit/${encodeURIComponent(c.branch)}/${FILE}` : null;
+    $('#msgManuale').innerHTML = `<div class="avviso info"><b>Pubblicazione manuale</b> ${copiato ? '— ho copiato i dati negli appunti.' : '— copia il testo qui sotto.'}<ol style="margin:8px 0 0;padding-left:20px">
+      <li>${url ? `Apri <a href="${url}" target="_blank" rel="noopener"><b>l'editor di dati.json su GitHub</b></a>` : 'Apri su GitHub il file <code>data/dati.json</code> e clicca la matita ✏️'}.</li>
+      <li>Clicca dentro il testo, premi <b>Ctrl+A</b> e poi <b>Ctrl+V</b> per sostituire tutto.</li>
+      <li>Clicca il pulsante verde <b>Commit changes…</b> e conferma. Il sito si aggiorna in 1-2 minuti.</li></ol>
+      ${copiato ? '' : `<textarea class="in" readonly style="min-height:120px;margin-top:8px">${esc(testo)}</textarea>`}
+      <button class="btn sec pic" id="btnFatto" style="margin-top:10px">Fatto, ho salvato su GitHub</button></div>`;
+    $('#msgManuale').scrollIntoView({ behavior: 'smooth' });
+    if (url) window.open(url, '_blank', 'noopener');
+    $('#btnFatto').onclick = () => { MODIFICATO = false; localStorage.removeItem('bangTorreNera.bozza'); $('#msgManuale').innerHTML = ''; aggiornaStato(); msg('#msg', '✔ Perfetto!', 'ok'); };
+  }
+
   $('#btnPubblica').onclick = async () => {
-    if (!COLLEGATO) return;
+    if (!COLLEGATO) return pubblicaManuale();
     const btn = $('#btnPubblica'); btn.disabled = true; btn.textContent = 'Pubblico…';
     try {
       DATI.aggiornato = new Date().toISOString();
