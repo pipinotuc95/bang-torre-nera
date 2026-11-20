@@ -14,80 +14,13 @@
 <body>
 <header class="testata">
   <div class="wrap">
-    <a href="#/" class="logo-link" aria-label="Home">
-<img class="logo-orig" src="img/logo-torre-nera.png" alt="Circolo Ludico La Torre Nera – Osimo">
-<svg class="logo-tn" xmlns="http://www.w3.org/2000/svg" viewBox="95 8 410 256" role="img" aria-label="Il saloon della Torre Nera – Osimo">
-  <defs>
-    <radialGradient id="tnSole" cx="50%" cy="50%" r="50%">
-      <stop offset="0" stop-color="#f6d77a"/>
-      <stop offset=".55" stop-color="#e09a35" stop-opacity=".85"/>
-      <stop offset="1" stop-color="#a8231d" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="tnLegno" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#8a5a30"/>
-      <stop offset="1" stop-color="#5a3a22"/>
-    </linearGradient>
-    <linearGradient id="tnLuce" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffe9a8"/>
-      <stop offset="1" stop-color="#e9a83a"/>
-    </linearGradient>
-    <pattern id="tnAssi" width="12" height="10" patternUnits="userSpaceOnUse">
-      <rect width="12" height="10" fill="url(#tnLegno)"/>
-      <line x1="0" y1="9.5" x2="12" y2="9.5" stroke="#3d2718" stroke-width="1.2"/>
-    </pattern>
-  </defs>
-
-  <!-- sole al tramonto -->
-  <circle cx="300" cy="150" r="138" fill="url(#tnSole)"/>
-
-  <!-- terreno -->
-  <ellipse cx="300" cy="246" rx="235" ry="12" fill="#3d2718"/>
-
-  <!-- cactus -->
-  <g fill="#1d120b">
-    <path d="M128 246 V176 a9 9 0 0 1 18 0 V246 Z"/>
-    <path d="M128 214 h-12 a8 8 0 0 1 -8 -8 v-18 a6 6 0 0 1 12 0 v14 h8 Z"/>
-    <path d="M146 204 h11 v-24 a6 6 0 0 1 12 0 v28 a8 8 0 0 1 -8 8 h-15 Z"/>
-    <g><path d="M478 246 V200 a7 7 0 0 1 14 0 V246 Z"/>
-    <path d="M492 224 h8 v-14 a5 5 0 0 1 10 0 v18 a6 6 0 0 1 -6 6 h-12 Z"/></g>
-  </g>
-
-  <!-- IL SALOON (davanti alla base della torre) -->
-  <g transform="translate(-65 0)">
-    <!-- facciata a "falso fronte" -->
-    <path d="M262 246 V140 H278 V118 H452 V140 H468 V246 Z" fill="url(#tnAssi)" stroke="#2a1810" stroke-width="3"/>
-    <!-- insegna -->
-    <rect x="292" y="124" width="146" height="32" rx="3" fill="#f4e6c6" stroke="#2a1810" stroke-width="3"/>
-    <text x="365" y="149" text-anchor="middle" font-family="Rye, Georgia, serif" font-size="24" fill="#a8231d" letter-spacing="2">SALOON</text>
-    <!-- tettoia -->
-    <path d="M250 170 H480 L470 184 H260 Z" fill="#3d2718" stroke="#2a1810" stroke-width="2"/>
-    <rect x="270" y="184" width="6" height="62" fill="#3d2718"/>
-    <rect x="454" y="184" width="6" height="62" fill="#3d2718"/>
-    <!-- finestre -->
-    <g stroke="#2a1810" stroke-width="3">
-      <rect x="286" y="196" width="36" height="30" fill="url(#tnLuce)"/>
-      <rect x="408" y="196" width="36" height="30" fill="url(#tnLuce)"/>
-      <path d="M304 196 V226 M286 211 H322 M426 196 V226 M408 211 H444" fill="none" stroke-width="2.5"/>
-    </g>
-    <!-- ingresso con porte a battente -->
-    <rect x="340" y="190" width="50" height="56" fill="#2a1810"/>
-    <rect x="344" y="194" width="42" height="52" fill="#e9a83a" opacity=".55"/>
-    <path d="M343 206 q10 -6 21 0 V230 H343 Z" fill="#a8763e" stroke="#2a1810" stroke-width="2.5"/>
-    <path d="M366 206 q10 -6 21 0 V230 H366 Z" fill="#a8763e" stroke="#2a1810" stroke-width="2.5"/>
-    <path d="M347 214 H360 M347 222 H360 M370 214 H383 M370 222 H383" stroke="#5a3a22" stroke-width="2"/>
-    <!-- passerella di legno -->
-    <rect x="248" y="244" width="234" height="8" fill="#5a3a22" stroke="#2a1810" stroke-width="2"/>
-  </g>
-
-</svg>
-
-    </a>
+    <a href="#/" class="banner-link" aria-label="Home"><img class="banner" src="img/testata-saloon.jpg" alt="Saloon – Board Game"></a>
     <p class="marchio"><span class="tag" id="tag">Statistiche dei tornei</span></p>
   </div>
   <nav class="insegne"><div class="wrap" id="nav"></div></nav>
 </header>
 <main><div class="wrap" id="app"><section class="carta"><div class="vuoto"><span class="cactus">🐎</span>Sto sellando il cavallo…</div></section></div></main>
-<footer><span class="sep"></span>
+<footer><img class="logo-footer" src="img/logo-torre-nera.png" alt="Circolo Ludico La Torre Nera – Osimo" width="200"><span class="sep"></span>
   Statistiche non ufficiali dei tornei di BANG!® organizzati da La Torre Nera – Osimo.<br>
   BANG!® è un gioco di Emiliano Sciarra edito da <a href="https://www.dvgames.com" target="_blank" rel="noopener">dV Games</a>. Loghi e marchi appartengono ai rispettivi proprietari.
 </footer>
