@@ -389,7 +389,10 @@
   }
   window.addEventListener('hashchange', () => { render(); scrollTo(0, 0); });
 
-  fetch('data/dati.json?v=' + Date.now()).then(r => r.json()).then(d => {
+  // dati da Firebase (js/db.js); se Firebase non si carica entro 8 s, ripiego su data/dati.json
+  const daJson = () => fetch('data/dati.json?v=' + Date.now()).then(r => r.json());
+  const pronto = window.BANG_DB ? Promise.resolve(true) : new Promise(r => { window.addEventListener('bangdb', () => r(true), { once: true }); setTimeout(() => r(false), 8000); });
+  pronto.then(ok => ok ? window.BANG_DB.carica().catch(daJson) : daJson()).then(d => {
     DATI = d; S = B.calcola(DATI, filtro);
     if (d.config && d.config.sottotitolo) $('#tag').textContent = d.config.sottotitolo;
     render();

@@ -5,10 +5,7 @@
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const FILE = 'data/dati.json';
-  const LS = 'bangTorreNera.gh';
-
-  let DATI = null, SHA = null, MODIFICATO = false, COLLEGATO = false;
+  let DATI = null, MODIFICATO = false, COLLEGATO = false, ID_CARICATI = [];
   let partitaInModifica = null; // indice della partita in modifica nel torneo selezionato
   let nGiocatori = 6;
 
@@ -18,117 +15,90 @@
     $(box).innerHTML = testo ? `<div class="avviso ${tipo}">${testo}</div>` : '';
     if (box === '#msg') { clearTimeout(timerMsg); if (tipo !== 'err') timerMsg = setTimeout(() => { $('#msg').innerHTML = ''; }, 6000); }
   };
-  const b64enc = str => { const by = new TextEncoder().encode(str); let s = ''; for (let i = 0; i < by.length; i += 0x8000) s += String.fromCharCode.apply(null, by.subarray(i, i + 0x8000)); return btoa(s); };
-  const b64dec = b => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g, '')), c => c.charCodeAt(0)));
   const idTorneo = t => `${t.data}-${B.slug(t.sede)}`;
-  const cfgGH = () => ({ owner: $('#ghOwner').value.trim(), repo: $('#ghRepo').value.trim(), branch: $('#ghBranch').value.trim() || 'main', token: $('#ghToken').value.replace(/\s+/g, '') });
-  const api = (path, opt = {}) => {
-    const c = cfgGH();
-    return fetch(`https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/${path}`, Object.assign({
-      headers: { Authorization: 'Bearer ' + c.token, Accept: 'application/vnd.github+json' }, cache: 'no-store'
-    }, opt));
+  const ERRORI = {
+    'auth/invalid-credential': 'Email o password non corretti.', 'auth/wrong-password': 'Password non corretta.',
+    'auth/user-not-found': 'Nessun utente con questa email.', 'auth/invalid-email': 'Email non valida.',
+    'auth/too-many-requests': 'Troppi tentativi: riprova tra qualche minuto.', 'auth/network-request-failed': 'Connessione a Firebase non riuscita (rete, antivirus o blocco pubblicità).',
+    'auth/unauthorized-domain': 'Questo indirizzo non è tra i "Domini autorizzati" di Firebase Authentication.',
+    'permission-denied': 'Permesso negato: questo account non è autorizzato a scrivere (controlla l\'UID nelle regole di Firestore).',
+    'unavailable': 'Firebase non raggiungibile: controlla la connessione e riprova.'
   };
+  const errore = e => esc(ERRORI[e && e.code] || ((e && e.message) || String(e)));
 
   function segnaModifica() {
     MODIFICATO = true;
-    $('#btnPubblica').disabled = false;
+    $('#btnPubblica').disabled = !COLLEGATO;
     aggiornaStato();
     try { localStorage.setItem('bangTorreNera.bozza', JSON.stringify(DATI)); } catch (e) { /* niente */ }
   }
   function aggiornaStato() {
     const p = MODIFICATO ? 'mod' : COLLEGATO ? 'on' : '';
-    const t = COLLEGATO ? (MODIFICATO ? 'Modifiche da pubblicare' : 'Collegato · tutto pubblicato') : (DATI ? (MODIFICATO ? 'Modifiche da pubblicare (manuale)' : 'Senza collegamento') : 'Non collegato');
+    const t = COLLEGATO ? (MODIFICATO ? 'Modifiche da salvare' : 'Tutto salvato') : 'Non collegato';
     $('#stato').innerHTML = `<span class="pallino ${p}"></span>${t}`;
   }
   window.addEventListener('beforeunload', e => { if (MODIFICATO) { e.preventDefault(); e.returnValue = ''; } });
 
-  // ---------------- accesso ----------------
-  (function init() {
-    // prova a dedurre utente/repo dall'indirizzo GitHub Pages (utente.github.io/repo/)
-    const h = location.hostname.match(/^([^.]+)\.github\.io$/i);
-    if (h) { $('#ghOwner').value = h[1]; const r = location.pathname.split('/').filter(Boolean)[0]; $('#ghRepo').value = r && !/\.html$/.test(r) ? r : `${h[1]}.github.io`; }
-    try { const s = JSON.parse(localStorage.getItem(LS) || 'null'); if (s) { ['owner', 'repo', 'branch', 'token'].forEach(k => { if (s[k]) $('#gh' + k[0].toUpperCase() + k.slice(1)).value = s[k]; }); } } catch (e) { /* niente */ }
-  })();
+  // ---------------- accesso (Firebase) ----------------
+  const conDB = fn => window.BANG_DB ? fn(window.BANG_DB) : window.addEventListener('bangdb', () => fn(window.BANG_DB), { once: true });
+  setTimeout(() => { if (!window.BANG_DB) msg('#msgAccesso', 'Non riesco a caricare Firebase (www.gstatic.com bloccato?). Controlla la connessione e ricarica la pagina.', 'err'); }, 10000);
 
-  $('#btnCollega').onclick = async () => {
-    const c = cfgGH();
-    if (!c.owner || !c.repo || !c.token) return msg('#msgAccesso', 'Compila utente, repository e token.', 'err');
-    msg('#msgAccesso', 'Collegamento in corso…');
-    try {
-      const r = await api(`contents/${FILE}?ref=${encodeURIComponent(c.branch)}`);
-      if (r.status === 401) throw new Error('Token non valido o scaduto.');
-      if (r.status === 404) throw new Error(`Non trovo ${FILE} in ${c.owner}/${c.repo} (branch ${c.branch}), oppure il token non ha accesso a questo repository.`);
-      if (!r.ok) throw new Error('Errore GitHub ' + r.status);
-      const j = await r.json();
-      // verifica permesso di scrittura
-      const rr = await api('');
-      const info = rr.ok ? await rr.json() : {};
-      if (info.permissions && !info.permissions.push) throw new Error('Il token può leggere ma non scrivere su questo repository.');
-      DATI = JSON.parse(b64dec(j.content)); SHA = j.sha; COLLEGATO = true; MODIFICATO = false;
-      if ($('#ricorda').checked) localStorage.setItem(LS, JSON.stringify(c)); else localStorage.removeItem(LS);
-      $('#secAccesso').style.display = 'none';
-      msg('#msgAccesso', `✔ Collegato a <b>${esc(c.owner)}/${esc(c.repo)}</b>. Dati caricati.`, 'ok');
-      avvia();
-    } catch (e) {
-      if (!(e instanceof TypeError)) return msg('#msgAccesso', esc(e.message), 'err');
-      // diagnosi: GitHub è raggiungibile senza token?
-      let raggiungibile = false;
-      try { raggiungibile = (await fetch('https://api.github.com/zen', { cache: 'no-store' })).ok; } catch (e2) { /* no */ }
-      const tok = $('#ghToken').value.replace(/\s+/g, '');
-      const strani = /[^\x21-\x7e]/.test(tok);
-      msg('#msgAccesso', (raggiungibile
-        ? (strani || !/^(github_pat_|ghp_)/.test(tok)
-            ? 'GitHub è raggiungibile, ma il <b>token</b> non sembra corretto (deve iniziare con <code>github_pat_</code> e non contenere caratteri strani). Ricopialo da GitHub con il pulsante 📋 e incollalo di nuovo.'
-            : 'GitHub è raggiungibile ma la richiesta con il token viene bloccata. Prova con un altro browser (Chrome/Edge) o disattiva le estensioni per questa pagina.')
-        : 'Il browser non riesce a raggiungere <b>api.github.com</b> nemmeno senza token: lo blocca una protezione (Brave Shields, blocco pubblicità, antivirus, DNS/rete). Prova da un altro browser o da un\'altra rete.')
-        + `<br><span class="mini dim">Dettaglio tecnico: ${esc(e.message)}</span>`, 'err');
-    }
-  };
-  $('#btnOffline').onclick = async () => {
-    try {
-      const r = await fetch(FILE + '?v=' + Date.now()); DATI = await r.json(); COLLEGATO = false; MODIFICATO = false;
-      const bozza = localStorage.getItem('bangTorreNera.bozza');
-      if (bozza && bozza !== JSON.stringify(DATI) && confirm('Ho trovato delle modifiche non ancora pubblicate su questo dispositivo. Vuoi riprenderle?')) { DATI = JSON.parse(bozza); MODIFICATO = true; }
-      $('#secAccesso').style.display = 'none';
-      msg('#msg', 'Modalità senza collegamento: inserisci i dati e poi premi <b>Pubblica sul sito</b>, ti guido io a salvarli su GitHub.', 'info');
-      avvia();
-    } catch (e) { msg('#msgAccesso', 'Non riesco a leggere ' + FILE + ': ' + esc(e.message), 'err'); }
-  };
-  $('#btnEsci').onclick = () => { localStorage.removeItem(LS); $('#ghToken').value = ''; msg('#msgAccesso', 'Token dimenticato su questo dispositivo.', 'info'); };
+  conDB(DB => {
+    if (!DB.attivo) { msg('#msgAccesso', 'Firebase non è ancora configurato: compila <code>js/firebase-config.js</code>.', 'err'); return; }
+    DB.suCambioUtente(async utente => {
+      if (!utente) {
+        COLLEGATO = false; $('#secAccesso').style.display = ''; $('#pannello').style.display = 'none'; $('#btnEsci').style.display = 'none';
+        aggiornaStato(); return;
+      }
+      $('#secAccesso').style.display = 'none'; $('#btnEsci').style.display = '';
+      $('#stato').innerHTML = '<span class="pallino"></span>Carico i dati…';
+      try {
+        const d = await DB.carica();
+        COLLEGATO = true; MODIFICATO = false;
+        ID_CARICATI = d._origine === 'firestore' ? d.tornei.map(t => t.id) : [];
+        DATI = { config: d.config || {}, tornei: d.tornei || [] };
+        const bozza = localStorage.getItem('bangTorreNera.bozza');
+        if (d._origine !== 'firestore') {
+          MODIFICATO = true;
+          msg('#msg', 'Il database è ancora vuoto: ho preparato i tornei già presenti nel sito. Premi <b>Salva sul sito</b> per trasferirli su Firebase.', 'info');
+        } else if (bozza && bozza !== JSON.stringify(DATI) && confirm('Su questo dispositivo ci sono modifiche non ancora salvate. Vuoi riprenderle?')) {
+          DATI = JSON.parse(bozza); MODIFICATO = true;
+        }
+        $('#btnPubblica').disabled = !MODIFICATO;
+        avvia();
+      } catch (e) { msg('#msg', 'Errore nel caricamento dei dati: ' + errore(e), 'err'); aggiornaStato(); }
+    });
+  });
 
-  // pubblicazione manuale: copia i dati e apre l'editor di GitHub sul file dati.json
-  async function pubblicaManuale() {
-    DATI.aggiornato = new Date().toISOString();
-    const testo = JSON.stringify(DATI, null, 1) + '\n';
-    let copiato = false;
-    try { await navigator.clipboard.writeText(testo); copiato = true; } catch (e) { /* niente */ }
-    const c = cfgGH();
-    const url = c.owner && c.repo ? `https://github.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/edit/${encodeURIComponent(c.branch)}/${FILE}` : null;
-    $('#msgManuale').innerHTML = `<div class="avviso info"><b>Pubblicazione manuale</b> ${copiato ? '— ho copiato i dati negli appunti.' : '— copia il testo qui sotto.'}<ol style="margin:8px 0 0;padding-left:20px">
-      <li>${url ? `Apri <a href="${url}" target="_blank" rel="noopener"><b>l'editor di dati.json su GitHub</b></a>` : 'Apri su GitHub il file <code>data/dati.json</code> e clicca la matita ✏️'}.</li>
-      <li>Clicca dentro il testo, premi <b>Ctrl+A</b> e poi <b>Ctrl+V</b> per sostituire tutto.</li>
-      <li>Clicca il pulsante verde <b>Commit changes…</b> e conferma. Il sito si aggiorna in 1-2 minuti.</li></ol>
-      ${copiato ? '' : `<textarea class="in" readonly style="min-height:120px;margin-top:8px">${esc(testo)}</textarea>`}
-      <button class="btn sec pic" id="btnFatto" style="margin-top:10px">Fatto, ho salvato su GitHub</button></div>`;
-    $('#msgManuale').scrollIntoView({ behavior: 'smooth' });
-    if (url) window.open(url, '_blank', 'noopener');
-    $('#btnFatto').onclick = () => { MODIFICATO = false; localStorage.removeItem('bangTorreNera.bozza'); $('#msgManuale').innerHTML = ''; aggiornaStato(); msg('#msg', '✔ Perfetto!', 'ok'); };
-  }
+  $('#formAccesso').onsubmit = e => {
+    e.preventDefault();
+    const btn = $('#btnEntra'); btn.disabled = true; msg('#msgAccesso', 'Accesso in corso…');
+    conDB(DB => DB.entra($('#email').value.trim(), $('#password').value)
+      .then(() => { msg('#msgAccesso', ''); $('#password').value = ''; })
+      .catch(err => msg('#msgAccesso', errore(err), 'err'))
+      .finally(() => { btn.disabled = false; }));
+  };
+  $('#lnkRecupera').onclick = e => {
+    e.preventDefault();
+    const em = $('#email').value.trim();
+    if (!em) return msg('#msgAccesso', 'Scrivi prima la tua email nel campo qui sopra.', 'err');
+    conDB(DB => DB.recupera(em).then(() => msg('#msgAccesso', 'Ti ho inviato una mail per reimpostare la password.', 'ok')).catch(err => msg('#msgAccesso', errore(err), 'err')));
+  };
+  $('#btnEsci').onclick = () => {
+    if (MODIFICATO && !confirm('Hai modifiche non salvate. Uscire comunque?')) return;
+    MODIFICATO = false; conDB(DB => DB.esci());
+  };
 
   $('#btnPubblica').onclick = async () => {
-    if (!COLLEGATO) return pubblicaManuale();
-    const btn = $('#btnPubblica'); btn.disabled = true; btn.textContent = 'Pubblico…';
+    if (!COLLEGATO) return;
+    const btn = $('#btnPubblica'); btn.disabled = true; btn.textContent = 'Salvo…';
     try {
-      DATI.aggiornato = new Date().toISOString();
-      const body = { message: 'Aggiornamento dati tornei (' + new Date().toLocaleString('it-IT') + ')', content: b64enc(JSON.stringify(DATI, null, 1) + '\n'), sha: SHA, branch: cfgGH().branch };
-      const r = await api(`contents/${FILE}`, { method: 'PUT', body: JSON.stringify(body) });
-      if (r.status === 409) throw new Error('Il file è stato modificato altrove nel frattempo. Scarica un backup, ricollegati e riprova.');
-      if (!r.ok) throw new Error('Errore GitHub ' + r.status + ': ' + ((await r.json()).message || ''));
-      const j = await r.json(); SHA = j.content.sha; MODIFICATO = false;
+      await window.BANG_DB.salva(DATI, ID_CARICATI);
+      ID_CARICATI = DATI.tornei.map(t => t.id); MODIFICATO = false;
       localStorage.removeItem('bangTorreNera.bozza');
-      msg('#msg', '✔ Pubblicato! Il sito si aggiorna da solo entro 1-2 minuti.', 'ok');
-    } catch (e) { msg('#msg', e instanceof TypeError ? 'Connessione a GitHub bloccata o assente: controlla internet / blocco pubblicità e riprova.' : esc(e.message), 'err'); btn.disabled = false; }
-    btn.textContent = 'Pubblica sul sito'; aggiornaStato();
+      msg('#msg', '✔ Salvato! Il sito è già aggiornato.', 'ok');
+    } catch (e) { msg('#msg', 'Salvataggio non riuscito: ' + errore(e), 'err'); btn.disabled = false; }
+    btn.textContent = 'Salva sul sito'; aggiornaStato();
   };
 
   // ---------------- pannello ----------------

@@ -48,26 +48,22 @@
 <div class="barra-stato"><div class="wrap">
   <span class="tit">★ Ufficio dello Sceriffo</span>
   <span class="stato" id="stato"><span class="pallino"></span>Non collegato</span>
-  <button class="btn" id="btnPubblica" disabled>Pubblica sul sito</button>
+  <button class="btn" id="btnPubblica" disabled>Salva sul sito</button>
+  <button class="btn sec pic" id="btnEsci" style="display:none">Esci</button>
   <a class="btn sec pic" href="./">Vai al sito</a>
 </div></div>
 
 <main><div class="wrap">
-  <section class="carta chiodi" id="secAccesso">
+  <section class="carta chiodi" id="secAccesso" style="max-width:520px;margin:0 auto">
     <h2><span class="kicker">Solo per lo Sceriffo</span>Accesso</h2>
-    <p>Per salvare serve un <b>token GitHub</b> con permesso di scrittura sul repository del sito. Senza token puoi guardare, ma non pubblicare nulla: è questo che garantisce che solo tu possa inserire i dati.</p>
-    <div class="riga r4">
-      <label class="campo"><span>Utente GitHub</span><input class="in" id="ghOwner" placeholder="es. mariorossi"></label>
-      <label class="campo"><span>Repository</span><input class="in" id="ghRepo" placeholder="es. bang-torre-nera"></label>
-      <label class="campo"><span>Branch</span><input class="in" id="ghBranch" value="main"></label>
-      <label class="campo"><span>Token</span><input class="in" id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></label>
-    </div>
-    <label style="font-size:14px"><input type="checkbox" id="ricorda" checked> Ricorda su questo dispositivo</label>
-    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn" id="btnCollega">Collegati e carica i dati</button>
-      <button class="btn sec" id="btnOffline">Lavora senza collegarti</button>
-      <button class="btn sec" id="btnEsci">Dimentica token</button>
-    </div>
+    <form id="formAccesso" autocomplete="on">
+      <label class="campo"><span>Email</span><input class="in" id="email" type="email" autocomplete="username" required></label>
+      <label class="campo"><span>Password</span><input class="in" id="password" type="password" autocomplete="current-password" required></label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn" type="submit" id="btnEntra">Entra</button>
+        <a href="#" id="lnkRecupera" style="font-size:14px">Password dimenticata?</a>
+      </div>
+    </form>
     <div id="msgAccesso"></div>
   </section>
 
@@ -147,14 +143,15 @@
       </div>
     </section>
   </div>
-  <div id="msgManuale" style="margin-top:18px"></div>
   <div id="msg"></div>
 </div></main>
 
 <datalist id="dlSedi"></datalist>
 <datalist id="dlGiocatori"></datalist>
 <datalist id="dlPersonaggi"></datalist>
+<script src="js/firebase-config.js"></script>
 <script src="js/stats.js"></script>
 <script src="js/admin.js"></script>
+<script type="module" src="js/db.js"></script>
 </body>
 </html>
