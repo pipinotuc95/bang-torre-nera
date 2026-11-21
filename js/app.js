@@ -409,7 +409,6 @@
   const pronto = window.BANG_DB ? Promise.resolve(true) : new Promise(r => { window.addEventListener('bangdb', () => r(true), { once: true }); setTimeout(() => r(false), 8000); });
   pronto.then(ok => ok ? window.BANG_DB.carica().catch(daJson) : daJson()).then(d => {
     DATI = d; MINI = d.miniature || {}; S = B.calcola(DATI, filtro);
-    if (d.config && d.config.sottotitolo) $('#tag').textContent = d.config.sottotitolo;
     render();
   }).catch(e => { $('#app').innerHTML = `<section class="carta">${vuoto('Impossibile caricare i dati: ' + esc(e.message))}</section>`; });
 })();
