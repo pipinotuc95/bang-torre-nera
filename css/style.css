@@ -243,8 +243,39 @@ footer .sep{display:block;margin:0 auto 14px;width:140px;height:14px;
 /* testata con immagine "Saloon" */
 .testata{padding-top:16px}
 .banner-link{display:block;position:relative;z-index:1}
-.banner{display:block;width:100%;max-width:840px;height:auto;margin:0 auto;border-radius:10px;
+.banner{display:block;width:100%;max-width:1100px;height:auto;margin:0 auto;border-radius:10px;
   box-shadow:0 2px 0 rgba(0,0,0,.3),0 18px 40px -12px rgba(0,0,0,.8);
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}
 .marchio .tag{margin-top:10px}
 .logo-footer{display:block;margin:0 auto 18px;width:200px;height:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6))}
+
+/* pagina Duello */
+.duello-scelta{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.duello-scelta .sel{min-width:220px}
+.duello-scelta .vs,.vs{font-family:var(--f-wanted);color:var(--red);font-size:26px}
+.duello-testa{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;text-align:center;margin:22px 0 6px}
+.duellante .nome-du{font-family:var(--f-titolo);font-size:19px;margin-top:8px}
+.carta-duello{width:96px;border-radius:8px;box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
+.punteggio .cifra-grande{font-size:52px}
+.verdetto{text-align:center;font-family:var(--f-titolo);color:var(--ink-2);margin:6px 0 10px}
+.vs-blocco{margin-top:18px}
+.vs-blocco h3{text-align:center;border-bottom:2px solid var(--ink-2);padding-bottom:6px}
+.vsr{display:grid;grid-template-columns:90px 1fr minmax(120px,190px) 1fr 90px;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed rgba(90,61,40,.3)}
+.vsr .va{font-family:var(--f-mono);font-size:14px;text-align:right;white-space:nowrap}
+.vsr .va.dx{text-align:left}
+.vsr .va.win{font-weight:700;color:var(--red-d)}
+.vsr .vl{text-align:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-2)}
+.vsr .vb{height:12px;background:rgba(90,61,40,.13);border-radius:4px;display:flex}
+.vsr .vb.sx{justify-content:flex-end}
+.vsr .vb i{display:block;height:100%;border-radius:4px;background:#b9a07a}
+.vsr .vb i.win{background:var(--red)}
+@media (max-width:640px){
+  .vsr{grid-template-columns:62px 1fr 62px;grid-template-areas:"l l l" "a s b" "a d b"}
+  .vsr .vl{grid-column:1/-1;grid-row:1}
+  .vsr .va{grid-row:2}.vsr .va.dx{grid-column:3}
+  .vsr .vb.sx{grid-column:2;grid-row:2}.vsr .vb.dx{grid-column:2;grid-row:3}
+  .vsr .vb.dx{justify-content:flex-start}
+  .duello-scelta .sel{width:100%;min-width:0}.duello-scelta .vs{width:100%;text-align:center;line-height:1}
+  .vsr .vb.sx{justify-content:flex-start}
+  .duello-testa .cifra-grande{font-size:34px}.carta-duello{width:64px}
+}
