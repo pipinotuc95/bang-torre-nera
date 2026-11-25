@@ -290,9 +290,9 @@
           ${s.slice().reverse().map(x => `<tr><td>${B.fmtData(x.torneo.data)}</td><td>${lnkT(x.torneo)}</td><td class="num"><span class="pos ${posCls(x.pos)}" style="font-size:15px">${x.pos}°</span><span class="dim mini">/${x.n}</span></td><td class="num">${B.fmt$(x.dollari)}</td></tr>`).join('')}
         </tbody></table></div></section>
         <section class="carta"><h2>Rivali</h2>${riv.length ? `<p class="nota" style="margin-top:-6px">Chi ha incontrato più spesso nei tornei e chi è arrivato davanti.</p><div class="tab-wrap"><table class="t"><thead><tr><th>Avversario</th><th class="num">Tornei insieme</th><th class="num">Bilancio</th></tr></thead><tbody>
-          ${riv.map(r => `<tr><td>${lnkG(r.q)}</td><td class="num">${r.c.comuni.length}</td><td class="num"><a href="#/sfida/${p.slug}/${r.q.slug}" title="Confronto">${r.c.aDavanti}–${r.c.bDavanti}</a></td></tr>`).join('')}
+          ${riv.map(r => `<tr><td>${lnkG(r.q)}</td><td class="num">${r.c.comuni.length}</td><td class="num"><a href="#/duello/${p.slug}/${r.q.slug}" title="Confronto">${r.c.aDavanti}–${r.c.bDavanti}</a></td></tr>`).join('')}
           </tbody></table></div>` : '<p class="nota">Ancora nessun avversario in comune.</p>'}
-          <p style="margin:12px 0 0"><a class="btn sec pic" href="#/sfida/${p.slug}">Sfida a duello un altro giocatore →</a></p></section>
+          <p style="margin:12px 0 0"><a class="btn sec pic" href="#/duello/${p.slug}">Sfida a duello un altro giocatore →</a></p></section>
       </div>
       ${p.nPartite ? `<div class="griglia g2" style="margin-top:22px">
         <section class="carta"><h2>Vittorie per ruolo</h2>${barre(ruoliRighe, { max: 100 })}<p class="nota">Sceriffo ${p.volteSceriffo} ${p.volteSceriffo === 1 ? 'volta' : 'volte'} · ${B.fmt$(p.vinteATavolo)} vinti a tavolo · ${B.fmt$(p.speseAsta)} spesi alle aste</p></section>
@@ -315,32 +315,94 @@
     };
   };
 
-  PAGINE.sfida = (a, b) => {
-    const opz = sel => `<option value="">— scegli —</option>${S.giocatori.slice().sort((x, y) => x.nome.localeCompare(y.nome)).map(p => `<option value="${p.slug}" ${p.slug === sel ? 'selected' : ''}>${esc(p.nome)}</option>`).join('')}`;
+  // ---------------- DUELLO: due giocatori a confronto ----------------
+  PAGINE.duello = (a, b) => {
+    const ord = S.giocatori.slice().sort((x, y) => x.nome.localeCompare(y.nome));
+    const opz = sel => `<option value="">— scegli un pistolero —</option>${ord.map(p => `<option value="${p.slug}" ${p.slug === sel ? 'selected' : ''}>${esc(p.nome)}</option>`).join('')}`;
     const A = a && S.trova(a), Bb = b && S.trova(b);
-    let corpo = '<p class="nota">Scegli due giocatori per vedere il confronto.</p>';
-    if (A && Bb && A !== Bb) {
-      const c = B.confronto(S, A, Bb);
-      const riga = (l, va, vb, fmt = x => x, piuAlto = true) => { const wa = piuAlto ? va > vb : va < vb, wb = piuAlto ? vb > va : vb < va;
-        return `<tr><td class="num" style="${wa ? 'font-weight:700;color:var(--red-d)' : ''}">${fmt(va)}</td><td style="text-align:center;font-family:var(--f-mono);font-size:12.5px;text-transform:uppercase;color:var(--ink-2)">${l}</td><td style="${wb ? 'font-weight:700;color:var(--red-d)' : ''}">${fmt(vb)}</td></tr>`; };
-      corpo = `<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;text-align:center;margin:10px 0 18px">
-          <div>${avatar(A, 'avatar-sfida')}<div style="font-family:var(--f-titolo);margin-top:6px">${lnkG(A)}</div></div>
-          <div class="cifra-grande">${c.aDavanti} – ${c.bDavanti}</div>
-          <div>${avatar(Bb, 'avatar-sfida', 'background:var(--red-d)')}<div style="font-family:var(--f-titolo);margin-top:6px">${lnkG(Bb)}</div></div></div>
-        <p class="nota" style="text-align:center;margin-top:-8px">${c.comuni.length ? `Tornei giocati insieme: ${c.comuni.length}. Il punteggio indica quante volte ciascuno è arrivato davanti all'altro.` : 'Non hanno mai giocato lo stesso torneo.'}${c.tavoli.length ? ` Si sono sfidati allo stesso tavolo ${c.tavoli.length} ${c.tavoli.length === 1 ? 'volta' : 'volte'}.` : ''}</p>
-        <table class="t" style="max-width:560px;margin:0 auto"><tbody>
-          ${riga('Posizione generale', A.rank, Bb.rank, x => x + '°', false)}${riga('Tornei', A.presenze, Bb.presenze)}${riga('Totale', A.totale, Bb.totale, B.fmt$)}
-          ${riga('Media', A.media, Bb.media, B.fmt$)}${riga('Vittorie', A.vittorie, Bb.vittorie)}${riga('Podi', A.podi, Bb.podi)}
-          ${riga('Miglior pos.', A.migliorPos, Bb.migliorPos, x => x + '°', false)}${riga('Indice piazz.', A.indiceMedio, Bb.indiceMedio, x => B.fmtN(x))}
-        </tbody></table>
-        ${c.comuni.length ? `<h3 style="margin-top:22px">Testa a testa</h3><div class="tab-wrap"><table class="t"><thead><tr><th>Torneo</th><th class="num">${esc(A.nome)}</th><th class="num">${esc(Bb.nome)}</th></tr></thead><tbody>
-          ${c.comuni.map(x => `<tr><td>${B.fmtData(x.torneo.data)} · ${lnkT(x.torneo)}</td><td class="num" style="${x.a.pos < x.b.pos ? 'font-weight:700' : ''}">${x.a.pos}° · ${B.fmt$(x.a.dollari)}</td><td class="num" style="${x.b.pos < x.a.pos ? 'font-weight:700' : ''}">${x.b.pos}° · ${B.fmt$(x.b.dollari)}</td></tr>`).join('')}
-        </tbody></table></div>` : ''}`;
-    }
-    return `<section class="carta chiodi"><h2><span class="kicker">Mezzogiorno di fuoco</span>Sfida a duello</h2>
-      <div class="filtri"><select class="sel" id="sfA">${opz(a)}</select><b style="font-family:var(--f-wanted);color:var(--red);font-size:22px">VS</b><select class="sel" id="sfB">${opz(b)}</select></div>${corpo}</section>`;
+    const scelta = `<div class="duello-scelta"><select class="sel" id="duA">${opz(a)}</select>
+      <span class="vs">VS</span><select class="sel" id="duB">${opz(b)}</select>
+      ${A && Bb ? `<button class="btn sec pic" id="duScambia" title="Scambia">⇄</button>` : ''}<button class="btn sec pic" id="duCaso">🎲 A caso</button></div>`;
+    if (!A || !Bb || A === Bb) return `<section class="carta chiodi"><h2><span class="kicker">Mezzogiorno di fuoco</span>Duello</h2>${scelta}
+      <p class="nota" style="text-align:center;margin-top:18px">Scegli due giocatori per vederli uno contro l'altro: classifica, tornei, scontri diretti e statistiche di gioco.</p></section>`;
+
+    const c = B.confronto(S, A, Bb);
+    // riga VS con barre speculari; meglio: 'alto' | 'basso'
+    let pA = 0, pB = 0;
+    const riga = (l, va, vb, fmt = x => B.fmtN(x), meglio = 'alto') => {
+      const na = va == null ? null : +va, nb = vb == null ? null : +vb;
+      let wa = false, wb = false;
+      if (na != null && nb != null && na !== nb) { wa = meglio === 'alto' ? na > nb : na < nb; wb = !wa; if (wa) pA++; else pB++; }
+      const scala = x => { if (x == null) return 0; if (meglio === 'basso') { const m = Math.max(na || 0, nb || 0) || 1; return Math.max(6, (1 - (x - 1) / m) * 100); } const m = Math.max(na || 0, nb || 0) || 1; return x / m * 100; };
+      return `<div class="vsr"><div class="va ${wa ? 'win' : ''}">${na == null ? '–' : fmt(na)}</div>
+        <div class="vb sx"><i style="width:${scala(na)}%" class="${wa ? 'win' : ''}"></i></div>
+        <div class="vl">${l}</div>
+        <div class="vb dx"><i style="width:${scala(nb)}%" class="${wb ? 'win' : ''}"></i></div>
+        <div class="va dx ${wb ? 'win' : ''}">${nb == null ? '–' : fmt(nb)}</div></div>`;
+    };
+    const pc = (v, g) => g ? v / g * 100 : null;
+    const fP = x => Math.round(x) + '%';
+    const blocco = (tit, righe) => `<div class="vs-blocco"><h3>${tit}</h3>${righe.join('')}</div>`;
+
+    const torneo = blocco('Tornei', [
+      riga('Posizione generale', A.rank, Bb.rank, x => x + '°', 'basso'),
+      riga('Taglia totale', A.totale, Bb.totale, B.fmt$),
+      riga('Media a torneo', A.media, Bb.media, B.fmt$),
+      riga('Record in un torneo', A.migliorDollari, Bb.migliorDollari, B.fmt$),
+      riga('Tornei giocati', A.presenze, Bb.presenze),
+      riga('Tornei vinti', A.vittorie, Bb.vittorie),
+      riga('Podi', A.podi, Bb.podi),
+      riga('Top 10', A.top10, Bb.top10),
+      riga('Miglior piazzamento', A.migliorPos, Bb.migliorPos, x => x + '°', 'basso'),
+      riga('Indice piazzamento', A.indiceMedio, Bb.indiceMedio)
+    ]);
+    const gioco = (A.nPartite || Bb.nPartite) ? blocco('A tavolo', [
+      riga('Partite giocate', A.nPartite, Bb.nPartite),
+      riga('Partite vinte', A.partiteVinte, Bb.partiteVinte),
+      riga('% vittorie', pc(A.partiteVinte, A.nPartite), pc(Bb.partiteVinte, Bb.nPartite), fP),
+      ...Object.keys(B.RUOLI).map(r => riga(`% vinte da ${B.RUOLI[r].nome}`, A.ruoli[r] ? pc(A.ruoli[r].v, A.ruoli[r].g) : null, Bb.ruoli[r] ? pc(Bb.ruoli[r].v, Bb.ruoli[r].g) : null, fP)),
+      riga('$ vinti a tavolo', A.vinteATavolo, Bb.vinteATavolo, B.fmt$),
+      riga('Spesa media all\'asta', A.nPartite ? A.astaMedia : null, Bb.nPartite ? Bb.astaMedia : null, B.fmt$, 'basso')
+    ]) : '';
+
+    const tavoli = c.tavoli.map(pt => {
+      const xa = pt.giocatori.find(x => B.norm(x.nome) === A.key), xb = pt.giocatori.find(x => B.norm(x.nome) === Bb.key);
+      const stessa = xa.ruolo && xb.ruolo && B.RUOLI[xa.ruolo].fazione === B.RUOLI[xb.ruolo].fazione;
+      const r = x => x.ruolo ? `<span class="ruolo ${x.ruolo}">${B.RUOLI[x.ruolo].nome}</span>` : '';
+      return `<tr><td>${B.fmtData(pt.torneo.data)} · T${esc(pt.turno || '?')} tav. ${esc(pt.tavolo || '?')}</td>
+        <td class="num">${xa.vinta ? '✔ ' : ''}${r(xa)} <span class="dim mini">${esc(xa.personaggio || '')}</span></td>
+        <td class="num">${xb.vinta ? '✔ ' : ''}${r(xb)} <span class="dim mini">${esc(xb.personaggio || '')}</span></td>
+        <td class="mini dim">${stessa ? 'alleati' : 'avversari'}</td></tr>`;
+    }).join('');
+    const tvA = c.tavoli.filter(pt => pt.giocatori.find(x => B.norm(x.nome) === A.key).vinta).length;
+    const tvB = c.tavoli.filter(pt => pt.giocatori.find(x => B.norm(x.nome) === Bb.key).vinta).length;
+
+    const corpoStat = torneo + gioco;
+    const verdetto = pA === pB ? 'Pareggio nelle statistiche!' : `${esc((pA > pB ? A : Bb).nome)} vince ${Math.max(pA, pB)} statistiche su ${pA + pB}`;
+    const lato = (p, col) => `<div class="duellante">${MINI[p.slug] ? `<img class="carta-duello" src="${MINI[p.slug]}" alt="">` : `<span class="avatar-sfida" style="${col}">${iniziali(p.nome)}</span>`}
+      <div class="nome-du">${lnkG(p)}</div><div class="mini dim">${p.rank}° in classifica · ${p.presenze} ${p.presenze === 1 ? 'torneo' : 'tornei'}</div></div>`;
+
+    return `<section class="carta chiodi"><h2><span class="kicker">Mezzogiorno di fuoco</span>Duello</h2>${scelta}
+      <div class="duello-testa">${lato(A, '')}
+        <div class="punteggio"><div class="cifra-grande">${c.aDavanti} – ${c.bDavanti}</div><div class="mini dim">${c.comuni.length ? `scontri diretti in ${c.comuni.length} ${c.comuni.length === 1 ? 'torneo' : 'tornei'}` : 'mai nello stesso torneo'}</div></div>
+        ${lato(Bb, 'background:var(--red-d)')}</div>
+      <p class="verdetto">⭐ ${verdetto}</p>
+      ${corpoStat}</section>
+      ${c.comuni.length ? `<section class="carta" style="margin-top:22px"><h2>Testa a testa nei tornei</h2><div class="tab-wrap"><table class="t"><thead><tr><th>Torneo</th><th class="num">${esc(A.nome)}</th><th class="num">${esc(Bb.nome)}</th></tr></thead><tbody>
+        ${c.comuni.map(x => `<tr><td>${B.fmtData(x.torneo.data)} · ${lnkT(x.torneo)}</td><td class="num" style="${x.a.pos < x.b.pos ? 'font-weight:700;color:var(--red-d)' : ''}">${x.a.pos}° · ${B.fmt$(x.a.dollari)}</td><td class="num" style="${x.b.pos < x.a.pos ? 'font-weight:700;color:var(--red-d)' : ''}">${x.b.pos}° · ${B.fmt$(x.b.dollari)}</td></tr>`).join('')}
+      </tbody></table></div></section>` : ''}
+      ${c.tavoli.length ? `<section class="carta" style="margin-top:22px"><h2>Allo stesso tavolo</h2>
+        <p class="nota" style="margin-top:-6px">${c.tavoli.length} ${c.tavoli.length === 1 ? 'partita' : 'partite'} insieme: ${esc(A.nome)} ne ha vinte ${tvA}, ${esc(Bb.nome)} ${tvB}.</p>
+        <div class="tab-wrap"><table class="t"><thead><tr><th>Partita</th><th class="num">${esc(A.nome)}</th><th class="num">${esc(Bb.nome)}</th><th></th></tr></thead><tbody>${tavoli}</tbody></table></div></section>` : ''}`;
   };
-  PAGINE.sfida.dopo = () => { const go = () => { location.hash = `#/sfida/${$('#sfA').value}/${$('#sfB').value}`; }; $('#sfA').onchange = go; $('#sfB').onchange = go; };
+  PAGINE.duello.dopo = (a, b) => {
+    const vai = (x, y) => { location.hash = `#/duello/${x || ''}/${y || ''}`.replace(/\/+$/, ''); };
+    $('#duA').onchange = () => vai($('#duA').value, $('#duB').value);
+    $('#duB').onchange = () => vai($('#duA').value, $('#duB').value);
+    if ($('#duScambia')) $('#duScambia').onclick = () => vai(b, a);
+    $('#duCaso').onclick = () => { const g = S.giocatori; if (g.length < 2) return; const i = Math.floor(Math.random() * g.length); let j; do { j = Math.floor(Math.random() * g.length); } while (j === i); vai(g[i].slug, g[j].slug); };
+  };
+  PAGINE.sfida = PAGINE.duello; // vecchi link
 
   PAGINE.partite = () => {
     if (!S.partite.length) return `${filtriHtml()}<section class="carta">${vuoto('Le statistiche di gioco compariranno quando saranno inserite le schede delle partite.<br><span class="nota">Ruoli, personaggi, aste, fazioni vincenti, posti a tavolo…</span>')}</section>`;
@@ -391,11 +453,11 @@
   };
 
   // ---------------- router ----------------
-  const NAV = [['home', 'Saloon'], ['classifica', 'Classifica'], ['tornei', 'Tornei'], ['giocatori', 'Giocatori'], ['sfida', 'Sfida'], ['partite', 'Statistiche di gioco'], ['regolamento', 'Regolamento']];
+  const NAV = [['home', 'Saloon'], ['classifica', 'Classifica'], ['tornei', 'Tornei'], ['giocatori', 'Giocatori'], ['duello', 'Duello'], ['partite', 'Statistiche di gioco'], ['regolamento', 'Regolamento']];
   function render() {
     const parti = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
     const pag = PAGINE[parti[0]] ? parti[0] : 'home';
-    const att = { torneo: 'tornei', giocatore: 'giocatori' }[pag] || pag;
+    const att = { torneo: 'tornei', giocatore: 'giocatori', sfida: 'duello' }[pag] || pag;
     $('#nav').innerHTML = NAV.map(([k, l]) => `<a href="#/${k === 'home' ? '' : k}" class="${k === att ? 'on' : ''}">${l}</a>`).join('');
     $('#app').innerHTML = PAGINE[pag](...parti.slice(1));
     if (PAGINE[pag].dopo) PAGINE[pag].dopo(...parti.slice(1));
